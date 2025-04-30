@@ -12,9 +12,6 @@ client = genai.Client(api_key=key)
 con = sqlite3.connect("cellsandserpents.db")
 # so we can execute and fetch results from sql queries
 cur = con.cursor()
-# create our table in the database
-cur.execute("CREATE TABLE game(name, race, health, equipment, attack, defense, speed, charm, intelligence, magic powers)")
-# left off here; TODO
 
 def GenAI():
     response = client.models.generate_content(
@@ -31,4 +28,6 @@ def main():
 
     # name, race, health, equipment, attack, defense, speed, personality (charm, intelligence, magic power)
     # TODO
+    for row in cur.execute("SELECT * FROM game"):
+        print(row)
 main()
