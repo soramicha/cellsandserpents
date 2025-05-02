@@ -1,1 +1,1 @@
-pip # cellsandserpents
+# Cells and Serpents, a survival game!
