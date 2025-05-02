@@ -13,12 +13,22 @@ con = sqlite3.connect("cellsandserpents.db")
 # so we can execute and fetch results from sql queries
 cur = con.cursor()
 
-def GenAI():
-    response = client.models.generate_content(
-        model="gemini-2.0-flash", contents="tell me about a fairy dying in a small paragraph"
-    )
+"""
+storyData = {
+    theme: ""
 
-    print(response.text)
+
+}
+
+
+"""
+
+storyData = {}
+
+def GenAI(prompt):
+    return client.models.generate_content(
+        model="gemini-2.0-flash", contents=prompt
+    ).text
 
 def main():
     # welcome message
@@ -27,14 +37,22 @@ def main():
     try:
         # convert input into integer
         player_count = int(player_count)
-        # retreive number of players for the game
-        print(player_count, "players I see! Awesome, please define each of your player information...\n")
+
+        if player_count != 0:
+            # retreive number of players for the game
+            print(player_count, "players I see! Awesome, please define each of your player information...\n")
+        else:
+            print("Okay let's get straight into the game with preset characters then!\n")
 
     except ValueError:
         print("What you typed wasn't an integer. Ending session...")
 
     # store each player's data into SQLite
     for i in range(player_count):
+        # skip if player_count was 0
+        if player_count == 0:
+            break
+
         i = str(i)
         name = input("Type name of player " + i + ": ")
         race = input("Type race of player " + i + ": ")
@@ -69,8 +87,16 @@ def main():
         con.commit()
         print("Player #" + i + " information added\n")
 
-    # name, health, attack, defense, speed, personality (charm, intelligence, magic power)
-    # TODO
-    for row in cur.execute("SELECT * FROM game"):
-        print(row)
+    # allow players to choose their theme of journey
+    print(GenAI("give three options players can pick for their survival adventure. only provide simple word choices, no need for descriptions"))
+
+    theme_choice = input("Pick a theme for the game: ")
+
+    # store the answer TODO
+    print(theme_choice + "!")
+
+    # print out everything in our databse
+    """for row in cur.execute("SELECT * FROM game"):
+        print(row)"""
+
 main()
