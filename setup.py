@@ -10,7 +10,7 @@ cur = con.cursor()
 
 # create our table in the database
 # currently commented out because it's been created, but if you haven't done it on your end, uncomment this to create your table
-cur.execute("CREATE TABLE game(name, race, health, equipment, attack, defense, speed, charm, intelligence, magic powers)")
+cur.execute("CREATE TABLE game(name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)")
 
 # insert dummy data
 cur.execute("""
