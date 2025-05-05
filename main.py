@@ -35,17 +35,28 @@ def main():
     player_count = input("""Hello there! Welcome to Cells and Serpents!\nHow many players will be joining today?\nType number here: """)
 
     data = {}
+
+    # new database for the game
+    cur.execute("CREATE TABLE currentGame (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)")
+    
     try:
         # convert input into integer
         player_count = int(player_count)
 
-        if player_count != 0:
+        if player_count == 0:
+            print("0 players. I see...how sad. Game session ending...")
+            return 0
+        
+        pickFromPreset = input(f"{player_count} players I see! Awesome, would you like to pick those characters from our preset character set? (Y/N) ")
+
+
+        if pickFromPreset == "N" or pickFromPreset == "n":
             # retreive number of players for the game
-            print(player_count, "players I see! Awesome, please define each of your player information...\n")
+            print("Please define each of your player information...\n")
         
             # fetch next index
             cur.execute("SELECT COUNT(*) FROM game")
-            start_id = id = cur.fetchone()[0]
+            id = cur.fetchone()[0]
 
             # store each player's data into the database
             for i in range(player_count):
@@ -80,31 +91,69 @@ def main():
                     print("What you typed in certain areas wasn't an integer when it was supposed to be. Ending session...")
                     return 0
                 
-                # store all data into the database
+                # store all data into the main database
                 cur.execute("""
                     INSERT INTO game (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPower))
                 con.commit()
+
+                # add data into NEW database
+                cur.execute("""
+                    INSERT INTO currentGame (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (i, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPower))
+                con.commit()
+
                 print("Player #" + i + " information added\n")
                 # increment id
                 id += 1
 
-            # gets data of all players in this round of game
-            cur.execute(f"""
-                SELECT * FROM game WHERE id >= {start_id}
-                """)
-            data = cur.fetchall()
-            # prints out all players playing in this round
-            print("THIS ROUND:", data)
-
         else:
             print("Okay let's get straight into choosing from the preset characters then!\n")
+
+            cur.execute(f"""
+                SELECT id, name FROM game
+                """)
+            data = cur.fetchall()
             # allow users to pick players from the database TODO
+            for id, name in data:
+                print(id, name)
+
+            i = 0
+            while i != player_count:
+                player = input(f"Please type in the id of Player {i} you want from the list: ")
+
+                # check if player exists
+                cur.execute(f"""
+                    SELECT * FROM game WHERE id == {player}
+                """)
+                data = cur.fetchall()
+
+                if data is None:
+                    print("ID doesn't exist in the database. Please try again!")
+                else:
+                    i += 1
+                    # save player data
+                    cur.execute("""
+                        INSERT INTO currentGame (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], data[0][6], data[0][7], data[0][8], data[0][9], data[0][10]))
+                    con.commit()
+                    print("Saved Successfully")
+
 
     except ValueError:
         print("What you typed wasn't an integer. Ending session...")
         return 0
+    
+    # gets data of all players in this round of game
+    cur.execute(f"""
+        SELECT * FROM currentGame
+        """)
+    data = cur.fetchall()
+    # prints out all players playing in this round
+    print("THIS ROUND:", data)
 
     theme_choice = input("Type a theme for the game: ")
 
@@ -113,9 +162,15 @@ def main():
     
     # give an opening to the game based on the theme choice players chose
     # allow players to pick choices in their journey
-    print(GenAI(f"""\n
-        the players in this data {str(data)}
-        where index 1 is their name. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names and stats if you choose to do so,
-        don't add any quotation marks and make sure to capitalize the first letter of their names"""))
+    print("\n" + GenAI(f"""
+        the players in this data {str(data)} is a list of tuples. respectively, one tuple contains id, name, race, health level, equipments the player has, attack level, defense level, speed level, charm level, intelligence level, and magic power level.
+        for the equipment parts, just understand those strings and make sure they are worded in a way it's understandable in human language. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names and stats if you choose to do so,
+        don't add any quotation marks and make sure to capitalize the first letter of their names. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT""") + "\n")
+
+    # add some game action stuff TODO
+
+
+    # when game finishes, drop the currentGame table
+    cur.execute("DROP TABLE currentGame")
 
 main()
