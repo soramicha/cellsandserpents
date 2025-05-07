@@ -1,5 +1,7 @@
-from google import genai
+# from google import genai
+import google.generativeai as genai
 import os # to access env var
+import json
 from dotenv import load_dotenv, find_dotenv
 import sqlite3
 # helper functions defined by ourselves
@@ -8,7 +10,8 @@ from update_stats import get_player_id_by_name, update_stat, print_player_stats
 # load env file for the genai
 _ = load_dotenv(find_dotenv())
 key = os.environ.get('GEMINI_API_KEY')
-client = genai.Client(api_key=key)
+# client = genai.Client(api_key=key)
+genai.configure(api_key=key)
 
 # connect to the database
 con = sqlite3.connect("cellsandserpents.db")
@@ -27,10 +30,36 @@ storyData = {
 
 storyData = {}
 
+# to track story events
+storyData = {
+    "log": []
+}
+
+# to track individual player history
+player_history = {}
+
 def GenAI(prompt):
     return client.models.generate_content(
         model="gemini-2.0-flash", contents=prompt
     ).text
+
+# add a major story event to story log
+def record_story_event(event_text):
+    storyData["log"].append(event_text)
+
+# track actions taken by individual player
+def record_player_action(player_id, action_text):
+    if player_id not in player_history:
+        player_history[player_id] = []
+    player_history[player_id].append(action_text)
+
+# save game history to a JSON file
+def save_game_history():
+    with open("game_history.json", "w") as f:
+        json.dump({
+            "story": storyData,
+            "players": player_history
+        }, f, indent=2)
 
 def kill_player(player_id):
     #fetch player from database
@@ -70,7 +99,9 @@ def kill_player(player_id):
 
 def main():
     # welcome message
-    cur.execute("DROP TABLE currentGame")
+    # cur.execute("DROP TABLE currentGame")
+    cur.execute("DROP TABLE IF EXISTS currentGame")
+
     player_count = input("""Hello there! Welcome to Cells and Serpents!\nHow many players will be joining today?\nType number here: """)
 
     data = {}
@@ -222,6 +253,16 @@ def main():
     # can debug using the print_player_stats function
 
     # when game finishes, drop the currentGame table
-    cur.execute("DROP TABLE currentGame")
+
+    opening = GenAI(f"""
+        the players in this data {str(data)} is a list of tuples...
+        ... based on the theme: {theme_choice} ...""")
+    print("\n" + opening + "\n")
+    record_story_event(opening)
+
+    save_game_history()
+
+    # cur.execute("DROP TABLE currentGame")
+    cur.execute("DROP TABLE IF EXISTS currentGame")
 
 main()
