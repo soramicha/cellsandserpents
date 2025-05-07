@@ -30,8 +30,45 @@ def GenAI(prompt):
         model="gemini-2.0-flash", contents=prompt
     ).text
 
+def kill_player(player_id):
+    #fetch player from database
+    cur.execute("SELECT * FROM game WHERE id = ?", (player_id,))
+    player = cur.fetchone()
+
+    if not player:
+        print(f"No player found with id {player_id}")
+        return
+    #set up for story
+    name = player[1]
+    race = player[2]
+    health = player[3]
+    equipment = player[4]
+    attack = player[5]
+    defense = player[6]
+    speed = player[7]
+    charm = player[8]
+    intelligence = player[9]
+    magic_power = player[10]
+
+    story = GenAI(f"""A character named {name} ({race}) has tragically died in the cells and serpants, here are their stats:
+                  -Health: {health} -Equipment: {equipment} -Attack: {attack} -Defense: {defense} -Speed: {speed}
+                    -Charm: {charm} -Intelligence: {intelligence} -Magic Power: {magic_power}
+                    Based on these stats please write one short, over the top, dramatic, and very brutal paragraph on how they died""")
+    
+    print("Death Report:")
+    print(story)
+
+    #delete the player
+    cur.execute("DELETE FROM game WHERE id = ?", (player_id,))
+    con.commit()
+    return 0
+
+
+    
+
 def main():
     # welcome message
+    cur.execute("DROP TABLE currentGame")
     player_count = input("""Hello there! Welcome to Cells and Serpents!\nHow many players will be joining today?\nType number here: """)
 
     data = {}
@@ -168,7 +205,7 @@ def main():
         don't add any quotation marks and make sure to capitalize the first letter of their names. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT""") + "\n")
 
     # add some game action stuff TODO
-
+    #kill_player(0) 
 
     # when game finishes, drop the currentGame table
     cur.execute("DROP TABLE currentGame")
