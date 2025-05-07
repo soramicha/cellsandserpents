@@ -2,6 +2,8 @@ from google import genai
 import os # to access env var
 from dotenv import load_dotenv, find_dotenv
 import sqlite3
+# helper functions defined by ourselves
+from update_stats import get_player_id_by_name, update_stat, print_player_stats
 
 # load env file for the genai
 _ = load_dotenv(find_dotenv())
@@ -169,6 +171,16 @@ def main():
 
     # add some game action stuff TODO
 
+    # note from angela:
+    # to be able to update player + affected players, need the player id
+    # would be best to have a variable storing the current player ID since most updates will happen to them
+
+    # if you would like to update a player's stat that is NOT the current player:
+    # use get_player_id_by_name(cur, player_name) 
+    # ^ assuming all player names in currentGame are UNIQUE
+
+    # can use the test() function in update_stats as an example of updating
+    # can debug using the print_player_stats function
 
     # when game finishes, drop the currentGame table
     cur.execute("DROP TABLE currentGame")
