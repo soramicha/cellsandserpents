@@ -38,10 +38,14 @@ storyData = {
 # to track individual player history
 player_history = {}
 
-def GenAI(prompt):
+"""def GenAI(prompt):
     return client.models.generate_content(
         model="gemini-2.0-flash", contents=prompt
-    ).text
+    ).text"""
+
+def GenAI(prompt):
+    response = genai.GenerativeModel("gemini-1.5-flash").generate_content(prompt)
+    return response.text
 
 # add a major story event to story log
 def record_story_event(event_text):
