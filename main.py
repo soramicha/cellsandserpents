@@ -4,6 +4,8 @@ import os # to access env var
 import json
 from dotenv import load_dotenv, find_dotenv
 import sqlite3
+import random
+from datetime import datetime
 # helper functions defined by ourselves
 from update_stats import get_player_id_by_name, update_stat, print_player_stats
 
@@ -17,18 +19,6 @@ genai.configure(api_key=key)
 con = sqlite3.connect("cellsandserpents.db")
 # so we can execute and fetch results from sql queries
 cur = con.cursor()
-
-"""
-storyData = {
-    theme: ""
-
-
-}
-
-
-"""
-
-storyData = {}
 
 # to track story events
 storyData = {
@@ -59,21 +49,22 @@ def record_player_action(player_id, action_text):
 
 # save game history to a JSON file
 def save_game_history():
-    with open("game_history.json", "w") as f:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    with open(f"gameHistories/game_history{timestamp}.json", "w") as f:
         json.dump({
             "story": storyData,
             "players": player_history
         }, f, indent=2)
 
 def kill_player(player_id):
-    #fetch player from database
+    # fetch player from database
     cur.execute("SELECT * FROM game WHERE id = ?", (player_id,))
     player = cur.fetchone()
 
     if not player:
         print(f"No player found with id {player_id}")
         return
-    #set up for story
+    # set up for story
     name = player[1]
     race = player[2]
     health = player[3]
@@ -93,20 +84,18 @@ def kill_player(player_id):
     print("Death Report:")
     print(story)
 
-    #delete the player
+    # delete the player
     cur.execute("DELETE FROM game WHERE id = ?", (player_id,))
     con.commit()
     return 0
 
-
-    
-
 def main():
-    # welcome message
-    # cur.execute("DROP TABLE currentGame")
+    # drop currentGame table if it exists
     cur.execute("DROP TABLE IF EXISTS currentGame")
 
+    # welcome message
     player_count = input("""Hello there! Welcome to Cells and Serpents!\nHow many players will be joining today?\nType number here: """)
+    playerNames = []
 
     data = {}
 
@@ -172,6 +161,12 @@ def main():
                 """, (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPower))
                 con.commit()
 
+                # save to playerNames
+                playerNames.append((id, name))
+
+                # initialize player_history for the player
+                player_history[id] = []
+
                 # add data into NEW database
                 cur.execute("""
                     INSERT INTO currentGame (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
@@ -208,14 +203,21 @@ def main():
                     print("ID doesn't exist in the database. Please try again!")
                 else:
                     i += 1
+
                     # save player data
                     cur.execute("""
                         INSERT INTO currentGame (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], data[0][6], data[0][7], data[0][8], data[0][9], data[0][10]))
                     con.commit()
-                    print("Saved Successfully")
 
+                    # initialize player_history for the player
+                    player_history[data[0][0]] = []
+
+                    # save to playerNames
+                    playerNames.append((data[0][0], data[0][1]))
+
+                    print("Saved Successfully")
 
     except ValueError:
         print("What you typed wasn't an integer. Ending session...")
@@ -226,8 +228,9 @@ def main():
         SELECT * FROM currentGame
         """)
     data = cur.fetchall()
+
     # prints out all players playing in this round
-    print("THIS ROUND:", data)
+    print("Players registered for the game:", data)
 
     theme_choice = input("Type a theme for the game: ")
 
@@ -236,14 +239,46 @@ def main():
     
     # give an opening to the game based on the theme choice players chose
     # allow players to pick choices in their journey
-    print("\n" + GenAI(f"""
+    opening = GenAI(f"""
         the players in this data {str(data)} is a list of tuples. respectively, one tuple contains id, name, race, health level, equipments the player has, attack level, defense level, speed level, charm level, intelligence level, and magic power level.
         for the equipment parts, just understand those strings and make sure they are worded in a way it's understandable in human language. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names and stats if you choose to do so,
-        don't add any quotation marks and make sure to capitalize the first letter of their names. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT""") + "\n")
+        don't add any quotation marks and make sure to capitalize the first letter of their names. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT. also, don't state their id numbers.""")
+    print("\n" + opening + "\n")
+
+    # store the opening
+    record_story_event(opening)
+
+    print("Your story...starts NOW!\n")
+    # start players actions
+    while True:
+        # ask for each player's actions
+        for player in data:
+            action = input(f"Enter what action {player[1]} wants to do: ")
+
+            # make sure successNum > success_rate in order to win
+            success_rate = random.randint(0, 100)
+            successNum = random.randint(0, 100)
+
+            # produce outcome
+            outcome = GenAI(f"""To be successful, success rate: {success_rate} must be < successNum: {successNum}. The amount of favoritism you give to the user input {player[1]} wishes to have depends on how well that inequality is.
+                            The bigger and farther away successNum is from success rate, the better the outcome is, and worse if vice versa. The action the {player[1]} wishes to do is: {action}. Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately
+                            based on the story given in an ordered list of scenes- don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: {player_history[player[0]]}""")
+
+            # save in player history
+            for id, p in playerNames:
+                checkAffectedPlayers = GenAI(f"""check if {outcome} involves {p}. return a single letter T if so, otherwise F""")
+                if checkAffectedPlayers == "T\n":
+                    record_player_action(id, outcome)
+
+            # prints outcome
+            print(outcome)
+
+        uInput = input("Type 'end' to save the story and end the game: ")
+        if uInput == "end":
+            break
 
     # add some game action stuff TODO
     #kill_player(0) 
-
 
     # note from angela:
     # to be able to update player + affected players, need the player id
@@ -256,17 +291,10 @@ def main():
     # can use the test() function in update_stats as an example of updating
     # can debug using the print_player_stats function
 
-    # when game finishes, drop the currentGame table
-
-    opening = GenAI(f"""
-        the players in this data {str(data)} is a list of tuples...
-        ... based on the theme: {theme_choice} ...""")
-    print("\n" + opening + "\n")
-    record_story_event(opening)
-
+    # save game history
     save_game_history()
 
-    # cur.execute("DROP TABLE currentGame")
+    # when game finishes, drop the currentGame table
     cur.execute("DROP TABLE IF EXISTS currentGame")
 
 main()
