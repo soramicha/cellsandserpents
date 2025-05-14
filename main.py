@@ -272,12 +272,8 @@ def main():
                             The bigger and farther away successNum is from success rate, the better the outcome is, and worse if vice versa. The action the {player[1]} wishes to do is: {action}. Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately
                             based on the story given in an ordered list of scenes- don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: {player_history[player[0]]}""")
 
+            # summarize the outcome - player history
             summary = simplify_outcome(outcome, player[1])
-
-            # record_player_action(player[0], {
-            #     "full": outcome,
-            #     "summary": summary
-            # })
 
             # save in player history
             for id, p in playerNames:
