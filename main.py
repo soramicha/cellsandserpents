@@ -7,7 +7,9 @@ import sqlite3
 import random
 from datetime import datetime
 # helper functions defined by ourselves
-from update_stats import get_player_id_by_name, update_stat, print_player_stats
+from update_stats import get_player_id_by_name, update_stat, print_player_stats, get_player_stats
+import ast # to parse stat deltas
+import re
 
 # load env file for the genai
 _ = load_dotenv(find_dotenv())
@@ -258,11 +260,20 @@ def main():
             # make sure successNum > success_rate in order to win
             success_rate = random.randint(0, 100)
             successNum = random.randint(0, 100)
+            start_stats = get_player_stats(cur, player[0])
+
+            # print(f"start stats: {start_stats}")
 
             # produce outcome
-            outcome = GenAI(f"""To be successful, success rate: {success_rate} must be < successNum: {successNum}. The amount of favoritism you give to the user input {player[1]} wishes to have depends on how well that inequality is.
-                            The bigger and farther away successNum is from success rate, the better the outcome is, and worse if vice versa. The action the {player[1]} wishes to do is: {action}. Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately
-                            based on the story given in an ordered list of scenes- don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: {player_history[player[0]]}""")
+            outcome = GenAI(f"""To be successful, success rate: {success_rate} must be < successNum: {successNum}. The amount of favoritism you give
+                               to the user input {player[1]} wishes to have depends on how well that inequality is. The bigger and farther away successNum
+                               is from success rate, the better the outcome is, and worse if vice versa. Use these stats to help make the outcome: {start_stats},
+                               which in order correspond to player id (ignore this), name, race, health, equipment, attack, defense, speed, charm, intelligence,
+                               and magic powers. The action {player[1]} wishes to do is: {action}. 
+                               Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original 
+                               wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 
+                               history here - don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: 
+                               {player_history[player[0]]}. Make sure to give only one clear outcome that reads like a cohesive paragraph.""")
 
             # save in player history
             for id, p in playerNames:
@@ -270,8 +281,42 @@ def main():
                 if checkAffectedPlayers == "T\n":
                     record_player_action(id, outcome)
 
+                    update_stats = GenAI(f"""Based on this paragraph {outcome}, return a list of estimated numerical stat deltas from -10 to 10
+                                          for {p} in the categories of "gold", "health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers". 
+                                          For the category "equipment", set it as a string that describes what materials they lost or gained and now currently have.
+                                          If there is no effect, just assign the category a score of 0. Please return in the format of a proper JSON list such as 
+                                          ["gold": 0, "equipment": "old shield", "health": -10, "attack": 1, ...], replacing the square brackets with curly braces.
+                                         Please don't give any explanation after - just the formatted JSON.""")
+                    
+                    print(f"for player {p}")
+                    print(update_stats)
+
+                    # attempt to parse and apply updates
+                    try:
+                        # Remove triple backticks and markdown syntax if present
+                        cleaned_update_stats = re.sub(r"```.*?\n|```", "", update_stats).strip()
+                        stat_changes = ast.literal_eval(cleaned_update_stats)
+                        # print(f"stat changes list: {stat_changes}")
+                        
+                        for stat, delta in stat_changes.items():
+                            if stat == "gold" or stat == "equipment":
+                                continue
+                            update_stat(cur, con, id, stat, delta)
+                    except Exception as e:
+                        print(f"Error updating stats for {p}: {e}")
+
             # prints outcome
             print(outcome)
+            # note from angela:
+            # to be able to update player + affected players, need the player id
+            # would be best to have a variable storing the current player ID since most updates will happen to them
+
+            # if you would like to update a player's stat that is NOT the current player:
+            # use get_player_id_by_name(cur, player_name) 
+            # ^ assuming all player names in currentGame are UNIQUE
+
+            # can use the test() function in update_stats as an example of updating
+            # can debug using the print_player_stats function
 
         uInput = input("Type 'end' to save the story and end the game: ")
         if uInput == "end":
@@ -279,17 +324,6 @@ def main():
 
     # add some game action stuff TODO
     #kill_player(0) 
-
-    # note from angela:
-    # to be able to update player + affected players, need the player id
-    # would be best to have a variable storing the current player ID since most updates will happen to them
-
-    # if you would like to update a player's stat that is NOT the current player:
-    # use get_player_id_by_name(cur, player_name) 
-    # ^ assuming all player names in currentGame are UNIQUE
-
-    # can use the test() function in update_stats as an example of updating
-    # can debug using the print_player_stats function
 
     # save game history
     save_game_history()

@@ -39,6 +39,17 @@ def print_player_stats(cur, player_id: int):
         print(f"{name.capitalize()}: {value}")
     print("---------------------\n")
 
+def get_player_stats(cur, player_id: int):
+    """Get player stats to use in AI prompt"""
+    cur.execute("SELECT * FROM currentGame WHERE id = ?", (player_id,))
+    row = cur.fetchone()
+
+    if not row:
+        print("Player not found in currentGame.")
+        return
+    
+    return row
+
 
 def test():
     # connect to the database
