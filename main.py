@@ -37,6 +37,14 @@ def GenAI(prompt):
     response = genai.GenerativeModel("gemini-1.5-flash").generate_content(prompt)
     return response.text
 
+# generate a short summary of the outcome
+def simplify_outcome(full_text, player_name):
+    prompt = f"""Summarize this story outcome in one short sentence.
+    Focus on what happened to {player_name}, and skip story fluff.
+    Outcome: {full_text}"""
+    summary = GenAI(prompt)
+    return summary.strip()
+
 # add a major story event to story log
 def record_story_event(event_text):
     storyData["log"].append(event_text)
@@ -240,7 +248,7 @@ def main():
     # give an opening to the game based on the theme choice players chose
     # allow players to pick choices in their journey
     opening = GenAI(f"""
-        the players in this data {str(data)} is a list of tuples. respectively, one tuple contains id, name, race, health level, equipments the player has, attack level, defense level, speed level, charm level, intelligence level, and magic power level.
+        The players in this data {str(data)} is a list of tuples. respectively, one tuple contains id, name, race, health level, equipments the player has, attack level, defense level, speed level, charm level, intelligence level, and magic power level.
         for the equipment parts, just understand those strings and make sure they are worded in a way it's understandable in human language. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names and stats if you choose to do so,
         don't add any quotation marks and make sure to capitalize the first letter of their names. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT. also, don't state their id numbers.""")
     print("\n" + opening + "\n")
@@ -264,11 +272,16 @@ def main():
                             The bigger and farther away successNum is from success rate, the better the outcome is, and worse if vice versa. The action the {player[1]} wishes to do is: {action}. Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately
                             based on the story given in an ordered list of scenes- don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: {player_history[player[0]]}""")
 
+            # summarize the outcome - player history
+            summary = simplify_outcome(outcome, player[1])
+
             # save in player history
             for id, p in playerNames:
                 checkAffectedPlayers = GenAI(f"""check if {outcome} involves {p}. return a single letter T if so, otherwise F""")
                 if checkAffectedPlayers == "T\n":
-                    record_player_action(id, outcome)
+                    record_player_action(id, {
+                        "summary": summary
+                    })
 
             # prints outcome
             print(outcome)
