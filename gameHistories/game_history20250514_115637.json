@@ -1,0 +1,50 @@
+{
+  "story": {
+    "log": [
+      "Welcome, beach volleyball gladiators, to the ultimate showdown of sun, sand, and\u2026 well, maybe not so much sun if you're Angela!  Prepare yourselves for a tournament so intense, it'll make your sunscreen melt!\n\n\nAngela, the fairy, enters the arena with a hopeful smile and a load of... nothing.  Seriously, her equipment is listed as \"nothing. useless.\"  Her health level is a measly 10, her attack a pathetic 1, and her defense a laughable 2.  With speed, charm, intelligence, and magic power all hovering around the same underwhelming levels, let's just say she'll need a miracle (or a really, really good sunscreen) to survive this.  Good luck, Angela! You'll need it.\n\n\nBri, the fairy, on the other hand, is a force to be reckoned with!  This queen of the court boasts a whopping 100 health level, packing a punch with 100 attack and a rock-solid 100 defense. With her amazing stats, she is equipped with everything, the epitome of a champion.  Her speed, charm, intelligence, and magic power also excel, making her a true contender.  Look out, competition; Bri's here to claim victory and bask in the glory!  Get ready for a beach volleyball hurricane!\n"
+    ],
+    "theme": "beach volleyball"
+  },
+  "players": {
+    "14": [
+      {
+        "summary": "Angela's attempt to hit the volleyball weakly failed."
+      },
+      {
+        "summary": "Bri's attempt to powerfully defeat Angela in volleyball resulted in a weak, disappointing victory."
+      },
+      {
+        "summary": "Angela's daring, nearly successful beach ball attempt overshadowed Bri's win."
+      },
+      {
+        "summary": "Bri won, but her victory over Angela was less impressive than she'd hoped."
+      },
+      {
+        "summary": "Angela gracefully surrendered a losing volleyball match."
+      },
+      {
+        "summary": "Bri's wish to laugh at Angela was fulfilled, highlighting Bri's superior skill."
+      }
+    ],
+    "16": [
+      {
+        "summary": "Angela's attempt to hit the volleyball weakly failed."
+      },
+      {
+        "summary": "Bri's attempt to powerfully defeat Angela in volleyball resulted in a weak, disappointing victory."
+      },
+      {
+        "summary": "Angela's daring, nearly successful beach ball attempt overshadowed Bri's win."
+      },
+      {
+        "summary": "Bri won, but her victory over Angela was less impressive than she'd hoped."
+      },
+      {
+        "summary": "Angela gracefully surrendered a losing volleyball match."
+      },
+      {
+        "summary": "Bri's wish to laugh at Angela was fulfilled, highlighting Bri's superior skill."
+      }
+    ]
+  }
+}

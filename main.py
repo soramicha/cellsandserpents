@@ -280,7 +280,6 @@ def main():
                 checkAffectedPlayers = GenAI(f"""check if {outcome} involves {p}. return a single letter T if so, otherwise F""")
                 if checkAffectedPlayers == "T\n":
                     record_player_action(id, {
-                        "full": outcome, 
                         "summary": summary
                     })
 
