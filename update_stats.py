@@ -6,9 +6,19 @@ def get_player_id_by_name(cur, name: str):
     result = cur.fetchone()
     return result[0] if result else None
 
+def update_equipment(cur, con, player_id: int, new_equipment: str):
+    """Update the equipment of a given player with a new string"""
+    query = """
+        UPDATE currentGame
+        SET equipment = ?
+        WHERE id = ?
+    """
+    cur.execute(query, (new_equipment, player_id))
+    con.commit()
+
 def update_stat(cur, con, player_id: int, field: str, delta: int):
     """Update the given field of the given player by delta (numerical only)"""
-    allowed_fields = {"health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers"}
+    allowed_fields = {"gold", "health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers"}
 
     if field not in allowed_fields:
         raise ValueError(f"'{field}' is not a valid updatable stat.")
