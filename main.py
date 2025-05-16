@@ -3,6 +3,7 @@ import google.generativeai as genai
 import os # to access env var
 import json
 from dotenv import load_dotenv, find_dotenv
+from collections import defaultdict
 import sqlite3
 import random
 from datetime import datetime
@@ -42,7 +43,7 @@ def GenAI(prompt):
 # generate a short summary of the outcome
 def simplify_outcome(full_text, player_name):
     prompt = f"""Summarize this story outcome in one short sentence.
-    Focus on what happened to {player_name}, and skip story fluff.
+    Focus on what happened to {player_name}, and mention any player names if involved because that's important, but skip any story fluff.
     Outcome: {full_text}"""
     summary = GenAI(prompt)
     return summary.strip()
@@ -59,16 +60,24 @@ def record_player_action(player_id, action_text):
 
 # save game history to a JSON file
 def save_game_history():
+    data = defaultdict(list)
+    cur.execute("SELECT * FROM currentGame")
+    d = cur.fetchall()
+    for id, name, race, gold, health, equipment, attack, defense, speed, charm, intelligence, magicPowers in d:
+        print(id, name, race, gold, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
+        data[id] = [id, name, race, gold, health, equipment, attack, defense, speed, charm, intelligence, magicPowers]
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     with open(f"gameHistories/game_history{timestamp}.json", "w") as f:
         json.dump({
             "story": storyData,
-            "players": player_history
+            "playersHistory": player_history,
+            "playersStats": data,
         }, f, indent=2)
 
 def kill_player(player_id):
     # fetch player from database
-    cur.execute("SELECT * FROM game WHERE id = ?", (player_id,))
+    cur.execute("SELECT * FROM currentGame WHERE id = ?", (player_id,))
     player = cur.fetchone()
 
     if not player:
@@ -95,7 +104,7 @@ def kill_player(player_id):
     print(story)
 
     # delete the player
-    cur.execute("DELETE FROM game WHERE id = ?", (player_id,))
+    cur.execute("DELETE FROM currentGame WHERE id = ?", (player_id,))
     con.commit()
     return 0
 
@@ -281,7 +290,9 @@ def main():
                                Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original 
                                wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 
                                history here - don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: 
-                               {player_history[player[0]]}. Make sure to give only one clear outcome that reads like a cohesive paragraph.""")
+                               {player_history[player[0]]}. Also, if there are any other players involved in the list {playerNames} besides the current {player[1]}, then
+                               also consider the success rate and how well the action could be executed based on that other player's stats. Search their stats
+                               here: {cur.fetchall()} and match data based on the names. Make sure to give only one clear outcome that reads like a cohesive paragraph.""")
 
             # summarize the outcome - player history
             summary = simplify_outcome(outcome, player[1])
