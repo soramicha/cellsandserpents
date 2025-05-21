@@ -34,7 +34,7 @@ def GenAI(prompt):
 
 def kill_player(player_id):
     #fetch player from database
-    cur.execute("SELECT * FROM game WHERE id = ?", (player_id,))
+    cur.execute("SELECT * FROM currentGame WHERE id = ?", (player_id,))
     player = cur.fetchone()
 
     if not player:
@@ -61,7 +61,7 @@ def kill_player(player_id):
     print(story)
 
     #delete the player
-    cur.execute("DELETE FROM game WHERE id = ?", (player_id,))
+    cur.execute("DELETE FROM currentGame WHERE id = ?", (player_id,))
     con.commit()
     return 0
 
@@ -207,7 +207,15 @@ def main():
         don't add any quotation marks and make sure to capitalize the first letter of their names. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT""") + "\n")
 
     # add some game action stuff TODO
-    #kill_player(0) 
+    cur.execute("SELECT id, name FROM currentGame WHERE health = 0")
+    dead_players = cur.fetchall()
+
+    if dead_players:
+        print("The following players have reached 0 health and died, let's see what happened.")
+        for id, name in dead_players:
+            print(name)
+            kill_player(id)
+        
 
 
     # note from angela:
