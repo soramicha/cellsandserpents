@@ -1,0 +1,24 @@
+{
+  "story": {
+    "log": [
+      "Welcome, golfers, to the most unexpected survival game EVER! Forget your putters and drivers; today, we're battling for survival on the green\u2026 with our wits and whatever rusty weapons we can find!  Let's meet our contenders:\n\nAngela, the Fairy, enters the fray!  With a measly 10 health points and absolutely nothing in the equipment department (\"nothing. useless,\" she says!), it seems our Angela might be more suited to a tea party than a brutal golf-survival game.  Her attack (1), defense (2), and speed (22222, oddly high!) stats are\u2026 well, let's just say she'll need a miracle (and maybe some serious golfing lessons).  Her charm (999999) is incredibly high, however, so maybe she can talk her way out of any sticky situations?  Intelligence (3) and magic power (3) aren't exactly setting the world on fire either. Good luck, Angela! You'll need it!\n\n\nNext up: Sophia, the Fairy!  Now *this* is a player.  Boasting a whopping 100 health points and armed with a sword and shield, Sophia means business.  With an impressive 80 attack, 30 defense, and 40 speed, she\u2019s a force to be reckoned with on the course \u2013 or off it.  Her charm (40), intelligence (70), and magic power (30) are all respectable as well. Sophia is one to watch out for, folks! This Fairy is ready to conquer the green!\n"
+    ],
+    "theme": "golf"
+  },
+  "playersHistory": {
+    "14": [
+      {
+        "summary": "Angela's weak attack with a stick was easily deflected by Sophia's sword."
+      }
+    ],
+    "0": [
+      {
+        "summary": "Angela's weak attack with a stick was easily deflected by Sophia's sword."
+      },
+      {
+        "summary": "Sophia successfully dodged an attack."
+      }
+    ]
+  },
+  "playersStats": {}
+}

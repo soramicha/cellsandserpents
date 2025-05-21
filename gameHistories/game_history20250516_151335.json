@@ -1,0 +1,50 @@
+{
+  "story": {
+    "log": [
+      "Welcome, brave adventurers, to the most RANDOM survival game EVER conceived!  Prepare for the unexpected, because in this world, anything can (and probably will) happen. Let's meet our contestants...\n\nBri, the fairy, struts in with a swagger that belies her stats.  She's got everything, apparently, (we're not questioning the \"everything\" part!), boasting 100 health, and a respectable attack and defense level. 90 charm? You're going places, Bri!   Her intelligence is a solid 30, and her magic power is a decent 20.  Let's hope her \"everything\" includes a good strategy, because she might need it.\n\n\nSophia, also a fairy (what's with the fairies?), arrives with a slightly less confident air. Armed with just a sword and shield, her stats are... well, let's just say she might want to find a really good hiding spot.  100 health is a plus, but 80 attack, 30 defense and 40 speed? Honey, you\u2019re going to need a miracle (and maybe a really, really good lucky charm!).  Her charm level is a respectable 40, which is something at least. Her intelligence and magic power sit at 40 and 70 respectively, so if things get dicey, maybe a well-placed spell could save the day. Good luck, Sophia! You'll need it!\n"
+    ],
+    "theme": "random"
+  },
+  "playersHistory": {
+    "16": [
+      {
+        "summary": "Bri took a nap on Angela's jacket."
+      }
+    ],
+    "0": [
+      {
+        "summary": "Sophia's cheese-eating adventure unexpectedly enhanced her magical abilities and intelligence."
+      }
+    ]
+  },
+  "playersStats": {
+    "16": [
+      16,
+      "bri",
+      "fairy",
+      101,
+      0,
+      "everything",
+      100,
+      100,
+      90,
+      21,
+      30,
+      20
+    ],
+    "0": [
+      0,
+      "Sophia",
+      "Fairy",
+      100,
+      0,
+      "sword, shield",
+      80,
+      30,
+      40,
+      30,
+      42,
+      73
+    ]
+  }
+}

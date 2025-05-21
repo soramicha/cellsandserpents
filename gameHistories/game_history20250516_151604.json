@@ -1,0 +1,50 @@
+{
+  "story": {
+    "log": [
+      "Welcome, bowlers, to the most unexpected survival game EVER! Forget pins and balls; we're using enchanted weaponry and sheer magical might to knock down our opponents!  Prepare for a uniquely chaotic experience where even the gutter ball has a chance to win...if they can survive long enough!\n\n\nLet's meet our contestants:\n\n\nSophia, the Fairy, enters the arena with a health of 100, wielding a sword and shield. With attack of 80, defense of 30, speed of 40, charm of 30, intelligence of 40, and magic power of 70, Sophia seems moderately equipped for this whimsical bowling brawl.  She'll need to watch her back, but a decent spread of stats means she's got a fighting chance!\n\n\nBri, also a fairy, is here to absolutely *destroy* everyone else.  With a full 100 health and seemingly wielding EVERYTHING (I don't even know what that means, but I'm impressed!), Bri is packing a punch.  Her 100 attack, 100 defense, 90 speed - these stats are LEGENDARY.  Even her charm, intelligence, and magic power, though lower at 20, 30, and 20 respectively, won't hold her back.  Watch out, everyone, because Bri is going to absolutely *bowl you over*!  This fairy is a force of nature!\n"
+    ],
+    "theme": "bowling"
+  },
+  "playersHistory": {
+    "0": [
+      {
+        "summary": "Sophia, using a charm offensive against Angela, unexpectedly won the bowling round despite her enchanted ball landing in the gutter."
+      }
+    ],
+    "16": [
+      {
+        "summary": "Bri obtained a moonstone bowl from a grumpy gnome chef."
+      }
+    ]
+  },
+  "playersStats": {
+    "0": [
+      0,
+      "Sophia",
+      "Fairy",
+      100,
+      5,
+      "sword, shield",
+      80,
+      30,
+      40,
+      37,
+      42,
+      71
+    ],
+    "16": [
+      16,
+      "bri",
+      "fairy",
+      100,
+      0,
+      "old equipment, plus a moonstone bowl sprinkled with pixie glitter",
+      100,
+      100,
+      90,
+      30,
+      30,
+      20
+    ]
+  }
+}
