@@ -60,7 +60,7 @@ def kill_player(player_id):
     print("Death Report:")
     print(story)
 
-    #delete the player
+    # delete the player
     cur.execute("DELETE FROM currentGame WHERE id = ?", (player_id,))
     con.commit()
     return 0
