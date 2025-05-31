@@ -1,0 +1,37 @@
+{
+  "story": {
+    "log": [
+      "Welcome, brave adventurers, to the most unpredictable survival game EVER conceived!  Prepare for the RANDOM!  We've thrown together a ragtag bunch of heroes... and some, well, let's just say \"enthusiastic participants.\"  Let's see who's got what it takes to survive... or at least not immediately die a hilariously embarrassing death!\n\n\nAngela, the Human, steps forward.  With a measly 100 health points, you're starting off looking a little... fragile, my dear.  Let's be honest,  your attack (20), defense (50), speed (40), charm (90), intelligence (80), and magic power (50) are... underwhelming, to say the least.  You've got zero equipment, so good luck with that.  Bring a spare pair of underpants, you're going to need them!  But hey, at least you\u2019ve got charm!  Maybe you can talk your way out of trouble... or at least beg for someone else to fight your battles.\n"
+    ],
+    "theme": "random"
+  },
+  "playersHistory": {
+    "1": [
+      {
+        "summary": "Angela's weak swing, despite her showmanship, failed to move the ball far."
+      },
+      {
+        "summary": "Angela, hitting again, landed a surprising blow on her opponent."
+      },
+      {
+        "summary": "Angela successfully ate a pony."
+      }
+    ]
+  },
+  "playersStats": {
+    "1": [
+      1,
+      "Angela",
+      "Human",
+      105,
+      5,
+      "old shield",
+      13,
+      50,
+      40,
+      105,
+      82,
+      50
+    ]
+  }
+}

@@ -11,6 +11,7 @@ from datetime import datetime
 from update_stats import get_player_id_by_name, update_equipment, update_stat, print_player_stats, get_player_stats
 import ast # to parse stat deltas
 import re
+from encounter import dice_roll
 
 # load env file for the genai
 _ = load_dotenv(find_dotenv())
@@ -336,6 +337,72 @@ def main():
 
             # prints outcome
             print(outcome)
+
+            # decide whether a random encounter will occur for this player
+            if dice_roll() >= 15:
+                # if so, then first generate a random encounter prompt
+                print(GenAI(f"""Generate a random dramatic encounter (1 paragraph is sufficient) just like how it works in DnD for {player[1]} in a creative matter, following
+                            closely to the topic/summary: {storyData['log']}. The player history, if any of {player[1]} is: 
+                                {player_history[player[0]]}."""))
+
+                # then ask for user input
+                action = input(f"Enter what action {player[1]} wants to do: ")
+
+                # produce outcome
+                outcome = GenAI(f"""To be successful, success rate: {success_rate} must be < successNum: {successNum}. The amount of favoritism you give
+                                to the user input {player[1]} wishes to have depends on how well that inequality is. The bigger and farther away successNum
+                                is from success rate, the better the outcome is, and worse if vice versa. Use these stats to help make the outcome: {start_stats},
+                                which in order correspond to player id (ignore this), name, race, health, gold, equipment, attack, defense, speed, charm, intelligence,
+                                and magic powers. The action {player[1]} wishes to do is: {action}. 
+                                Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original 
+                                wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 
+                                history here - don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: 
+                                {player_history[player[0]]}. Also, if there are any other players involved in the list {playerNames} besides the current {player[1]}, then
+                                also consider the success rate and how well the action could be executed based on that other player's stats. Search their stats
+                                here: {cur.fetchall()} and match data based on the names. Make sure to give only one clear outcome that reads like a cohesive paragraph.""")
+
+                # summarize the outcome - player history
+                summary = simplify_outcome(outcome, player[1])
+
+                # save in player history
+                for id, p in playerNames:
+                    checkAffectedPlayers = GenAI(f"""check if {outcome} involves {p}. return a single letter T if so, otherwise F""")
+                    if checkAffectedPlayers == "T\n":
+                        record_player_action(id, {
+                            "summary": summary
+                        })
+                        currentp_stats = get_player_stats(cur, id)
+                        player_equipment = currentp_stats[5]
+
+                        update_stats = GenAI(f"""Based on this paragraph {outcome}, return a list of estimated numerical stat deltas from -10 to 10
+                                            for {p} in the categories of "health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers". 
+                                            For the category of "gold", the delta is a reasonable amount gained/lost based on the paragraph.
+                                            If there is no effect, just assign the category a score of 0.
+                                            For the category "equipment", set it as a string that describes what equipment they have after event, 
+                                            based off of their previous equipment {player_equipment}. Please return in the format of a proper JSON list such as 
+                                            ["gold": 0, "equipment": "old shield", "health": -10, "attack": 1, ...], replacing the square brackets with curly braces.
+                                            Please don't give any explanation after - just the formatted JSON.""")
+                        
+                        print(f"for player {p}")
+                        print(update_stats)
+
+                        # attempt to parse and apply updates
+                        try:
+                            # Remove triple backticks and markdown syntax if present
+                            cleaned_update_stats = re.sub(r"```.*?\n|```", "", update_stats).strip()
+                            stat_changes = ast.literal_eval(cleaned_update_stats)
+                            # print(f"stat changes list: {stat_changes}")
+                            
+                            for stat, delta in stat_changes.items():
+                                if stat == "equipment" and stat_changes["equipment"] != 0:
+                                    update_equipment(cur, con, id, stat_changes["equipment"])
+                                else:
+                                    update_stat(cur, con, id, stat, delta)
+                        except Exception as e:
+                            print(f"Error updating stats for {p}: {e}")
+
+                # prints outcome
+                print(outcome)
 
         uInput = input("Type 'end' to save the story and end the game: ")
         if uInput == "end":
