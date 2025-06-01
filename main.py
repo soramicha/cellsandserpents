@@ -172,7 +172,6 @@ def main():
 
                 i = str(i)
                 name = input("Type name of player " + i + ": ")
-                health = input("Type health of player " + i + ": ")
                 equipment = input("Type a list of equipment(s) of player " + i + ": ")
                 attack = input("Type attack level of player " + i + ": ")
                 defense = input("Type defense level of player " + i + ": ")
@@ -183,7 +182,6 @@ def main():
                 # type checking
                 try:
                     # convert some inputs into integers
-                    health = int(health)
                     attack = int(attack)
                     defense = int(defense)
                     speed = int(speed)
@@ -194,17 +192,18 @@ def main():
                     return 0
                 
                 # store all data into the main database
+                # default health = 100, default gold = 0
                 cur.execute("""
                     INSERT INTO game (id, name, health, gold, equipment, attack, defense, speed, charm, intelligence)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (id, name, health, 0, equipment, attack, defense, speed, charm, intelligence))
+                """, (id, name, 100, 0, equipment, attack, defense, speed, charm, intelligence))
                 con.commit()
 
                 # add data into NEW database
                 cur.execute("""
                     INSERT INTO currentGame (id, name, health, gold, equipment, attack, defense, speed, charm, intelligence)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (id, name, health, 0, equipment, attack, defense, speed, charm, intelligence))
+                """, (id, name, 100, 0, equipment, attack, defense, speed, charm, intelligence))
                 con.commit()
 
                 # save to playerNames
@@ -358,13 +357,37 @@ def main():
             # prints outcome
             print(outcome)
 
-        uInput = input("Type 'end' to save the story and end the game: ")
-        if uInput == "end":
+            # check if the player dies
+            cur.execute("SELECT * FROM currentGame WHERE id = ? AND health <= 0", (playerID,))
+            row = cur.fetchone()
+
+            print(row, "Is the current stats") # TODO the updating of equipment and stats aren't correct
+            
+            if row:
+                print(f"{playerName} has reached 0 health or below and died, let's see what happened.")
+                kill_player(playerID)
+
+                # remove player from currentGame
+                cur.execute("DELETE FROM currentGame WHERE id = ?", (playerID,))
+
+                # remove from playerNames as well
+                playerNames.remove((playerID, playerName))
+
+                # update - get of all players in this round of game
+                cur.execute(f"SELECT * FROM currentGame")
+                playersInGame = cur.fetchall()
+
+        # if there are still more remaining players in the game, make sure to continue
+        if playersInGame != []:
+            uInput = input("Type 'end' to save the story and end the game: ")
+            if uInput == "end":
+                break
+        else:
+            # otherwise, end the story
             break
 
-    # add some game action stuff TODO
-    #kill_player(0) 
-
+    print("Saving game history...\nThank you for playing Cells & Serpents!")
+    
     # save game history
     save_game_history()
 
