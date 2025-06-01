@@ -68,9 +68,9 @@ def save_game_history():
     data = defaultdict(list)
     cur.execute("SELECT * FROM currentGame")
     d = cur.fetchall()
-    for id, name, race, gold, health, equipment, attack, defense, speed, charm, intelligence, magicPowers in d:
-        print(id, name, race, gold, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
-        data[id] = [id, name, race, gold, health, equipment, attack, defense, speed, charm, intelligence, magicPowers]
+    for id, name, gold, health, equipment, attack, defense, speed, charm, intelligence in d:
+        print(id, name, gold, health, equipment, attack, defense, speed, charm, intelligence)
+        data[id] = [id, name, gold, health, equipment, attack, defense, speed, charm, intelligence]
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     with open(f"gameHistories/game_history{timestamp}.json", "w") as f:
@@ -90,19 +90,17 @@ def kill_player(player_id):
         return
     # set up for story
     name = player[1]
-    race = player[2]
-    health = player[3]
-    equipment = player[4]
-    attack = player[5]
-    defense = player[6]
-    speed = player[7]
-    charm = player[8]
-    intelligence = player[9]
-    magic_power = player[10]
+    health = player[2]
+    equipment = player[3]
+    attack = player[4]
+    defense = player[5]
+    speed = player[6]
+    charm = player[7]
+    intelligence = player[8]
 
-    story = GenAI(f"""A character named {name} ({race}) has tragically died in the cells and serpants, here are their stats:
+    story = GenAI(f"""A character named {name} has tragically died in the cells and serpants, here are their stats:
                   -Health: {health} -Equipment: {equipment} -Attack: {attack} -Defense: {defense} -Speed: {speed}
-                    -Charm: {charm} -Intelligence: {intelligence} -Magic Power: {magic_power}
+                    -Charm: {charm} -Intelligence: {intelligence}
                     Based on these stats please write one short, over the top, dramatic, and very brutal paragraph on how they died""")
     
     print("Death Report:")
@@ -144,7 +142,7 @@ def main():
     playerNames = []
 
     # new database for the game
-    cur.execute("CREATE TABLE currentGame (id, name, race, health, gold, equipment, attack, defense, speed, charm, intelligence, magicPowers)")
+    cur.execute("CREATE TABLE currentGame (id, name, health, gold, equipment, attack, defense, speed, charm, intelligence)")
     
     try:
         # convert input into integer
@@ -174,16 +172,13 @@ def main():
 
                 i = str(i)
                 name = input("Type name of player " + i + ": ")
-                race = input("Type race of player " + i + ": ")
                 health = input("Type health of player " + i + ": ")
                 equipment = input("Type a list of equipment(s) of player " + i + ": ")
                 attack = input("Type attack level of player " + i + ": ")
                 defense = input("Type defense level of player " + i + ": ")
                 speed = input("Type speed level of player " + i + ": ")
-                # personality
                 charm = input("Type charm level of player " + i + ": ")
                 intelligence = input("Type intelligence level of player " + i + ": ")
-                magicPower = input("Type magic power level of player " + i + ": ")
 
                 # type checking
                 try:
@@ -194,27 +189,26 @@ def main():
                     speed = int(speed)
                     charm = int(charm)
                     intelligence = int(intelligence)
-                    magicPower = int(magicPower)
                 except ValueError:
                     print("What you typed in certain areas wasn't an integer when it was supposed to be. Ending session...")
                     return 0
                 
                 # store all data into the main database
                 cur.execute("""
-                    INSERT INTO game (id, name, race, health, gold, equipment, attack, defense, speed, charm, intelligence, magicPowers)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (id, name, race, health, 0, equipment, attack, defense, speed, charm, intelligence, magicPower))
+                    INSERT INTO game (id, name, health, gold, equipment, attack, defense, speed, charm, intelligence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (id, name, health, 0, equipment, attack, defense, speed, charm, intelligence))
+                con.commit()
+
+                # add data into NEW database
+                cur.execute("""
+                    INSERT INTO currentGame (id, name, health, gold, equipment, attack, defense, speed, charm, intelligence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (id, name, health, 0, equipment, attack, defense, speed, charm, intelligence))
                 con.commit()
 
                 # save to playerNames
                 playerNames.append((id, name))
-
-                # add data into NEW database
-                cur.execute("""
-                    INSERT INTO currentGame (id, name, race, health, gold, equipment, attack, defense, speed, charm, intelligence, magicPowers)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (i, name, race, health, 0, equipment, attack, defense, speed, charm, intelligence, magicPower))
-                con.commit()
 
                 print("Player #" + i + " information added\n")
                 # increment id for the next player
@@ -250,9 +244,9 @@ def main():
 
                     # and save the player data into the currentGame table
                     cur.execute("""
-                        INSERT INTO currentGame (id, name, race, health, gold, equipment, attack, defense, speed, charm, intelligence, magicPowers)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (playerInfo[0], playerInfo[1], playerInfo[2], playerInfo[3], 0, playerInfo[4], playerInfo[5], playerInfo[6], playerInfo[7], playerInfo[8], playerInfo[9], playerInfo[10]))
+                        INSERT INTO currentGame (id, name, health, gold, equipment, attack, defense, speed, charm, intelligence)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (playerInfo[0], playerInfo[1], playerInfo[2], playerInfo[3], 0, playerInfo[4], playerInfo[5], playerInfo[6], playerInfo[7], playerInfo[8]))
                     con.commit()
 
                     # save to playerNames
@@ -279,7 +273,7 @@ def main():
     # give an opening to the game based on the theme choice players chose
     # allow players to pick choices in their journey
     opening = GenAI(f"""
-        The players in this data {str(playersInGame)} is a list of tuples. respectively, one tuple contains id, name, race, health level, equipments the player has, attack level, defense level, speed level, charm level, intelligence level, and magic power level.
+        The players in this data {str(playersInGame)} is a list of tuples. respectively, one tuple contains id, name, health level, equipments the player has, attack level, defense level, speed level, charm level, and intelligence level.
         for the equipment parts, just understand those strings and make sure they are worded in a way it's understandable in human language. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names,
         don't add any quotation marks and make sure to capitalize the first letter of their names. you may menion the stats but don't mention any stats numerically - just word them in english. for example, each stat is given 0 - 100 level, with 0 being bad and 100 being good.
         so just mention how good or bad each player is based on their stats. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT. also, don't state their id numbers.""")
@@ -309,8 +303,7 @@ def main():
             outcome = GenAI(f"""To be successful, success rate: {success_rate} must be < successNum: {successNum}. The amount of favoritism you give
                                to the user input {playerName} wishes to have depends on how well that inequality is. The bigger and farther away successNum
                                is from success rate, the better the outcome is, and worse if vice versa. Use these stats to help make the outcome: {start_stats},
-                               which in order correspond to player id (ignore this), name, race, health, gold, equipment, attack, defense, speed, charm, intelligence,
-                               and magic powers. The action {playerName} wishes to do is: {action}. 
+                               which in order correspond to player id (ignore this), name, health, gold, equipment, attack, defense, speed, charm, and intelligence. The action {playerName} wishes to do is: {action}. 
                                Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original 
                                wish of {playerName} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 
                                history here - don't go off topic: {storyData['log']}. The player history, if any of {playerName} is: 
@@ -332,11 +325,12 @@ def main():
                     # record the player's summary
                     record_player_action(id, summary)
                     currentp_stats = get_player_stats(cur, id)
+                    print("current stats", currentp_stats)
                     player_equipment = currentp_stats[5]
 
                     # get updated json stats of current player
                     update_stats = GenAI(f"""Based on this paragraph {outcome}, return a list of estimated numerical stat deltas from -50 to 50
-                                          for {pName} in the categories of "health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers". 
+                                          for {pName} in the categories of "health", "attack", "defense", "speed", "charm", "intelligence". 
                                           For the category of "gold", the delta is a reasonable amount gained/lost based on the paragraph.
                                           If there is no effect, just assign the category a score of 0.
                                           For the category "equipment", set it as a string that describes what equipment they have after event, 

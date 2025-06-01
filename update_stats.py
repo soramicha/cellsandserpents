@@ -18,7 +18,7 @@ def update_equipment(cur, con, player_id: int, new_equipment: str):
 
 def update_stat(cur, con, player_id: int, field: str, delta: int):
     """Update the given field of the given player by delta (numerical only)"""
-    allowed_fields = {"gold", "health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers"}
+    allowed_fields = {"gold", "health", "attack", "defense", "speed", "charm", "intelligence"}
 
     if field not in allowed_fields:
         raise ValueError(f"'{field}' is not a valid updatable stat.")
@@ -66,7 +66,7 @@ def test():
     cur = con.cursor()
 
     try:
-        cur.execute("CREATE TABLE currentGame (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)")
+        cur.execute("CREATE TABLE currentGame (id, name, health, equipment, attack, defense, speed, charm, intelligence)")
 
         # print out template players to choose from
         cur.execute(f"""
@@ -91,9 +91,9 @@ def test():
         else:
             # save player data
             cur.execute("""
-                INSERT INTO currentGame (id, name, race, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], data[0][6], data[0][7], data[0][8], data[0][9], data[0][10]))
+                INSERT INTO currentGame (id, name, health, equipment, attack, defense, speed, charm, intelligence)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], data[0][6], data[0][7], data[0][8]))
             con.commit()
 
         player_id = data[0][0]
