@@ -278,7 +278,7 @@ def main():
 
             # make sure successNum > success_rate in order to win
             success_rate = random.randint(0, 100)
-            successNum = random.randint(0, 100)
+            successNum =  random.randint(0, 100)
             start_stats = get_player_stats(cur, player[0])
 
             # print(f"start stats: {start_stats}")
@@ -338,20 +338,21 @@ def main():
 
             # prints outcome
             print(outcome)
+            cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
+            dead_players = cur.fetchall()
+            print(dead_players)
+
+            if dead_players:
+                print("The following players have reached 0 health or below and died, let's see what happened.")
+                for id, name in dead_players:
+                    print(name)
+                    kill_player(id)
 
         uInput = input("Type 'end' to save the story and end the game: ")
         if uInput == "end":
             break
 
     # add some game action stuff TODO
-    cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
-    dead_players = cur.fetchall()
-
-    if dead_players:
-        print("The following players have reached 0 health or below and died, let's see what happened.")
-        for id, name in dead_players:
-            print(name)
-            kill_player(id)
         
 
     # save game history
