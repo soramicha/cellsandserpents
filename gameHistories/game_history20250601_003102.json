@@ -1,0 +1,38 @@
+{
+  "story": {
+    "log": [
+      "Oki, a Mol with high attack, speed, and charm, entered the pony-riding survival game.  No other players are mentioned in this outcome.",
+      "Oki, a Mol with 99 charm, successfully rode a pony and obtained a matching helmet.  The pony ride was a resounding success.",
+      "Oki, after a successful pony ride, charmed their way into a golden ticket for a larger pony-riding event.  No other players were involved.",
+      "Oki, the Mol, won a ticket to a pony-riding spectacle.  Oki and their pony are anticipating the event.",
+      "Oki fell off their pony during a ride but landed unharmed, much to the amusement of the crowd.  The pony remained unfazed.",
+      "Oki, a Mol, won a magnificent pony and a golden ticket to a pony-riding extravaganza through their charm and speed.  They rode off to the event."
+    ],
+    "theme": "pony riding"
+  },
+  "playersHistory": {
+    "25": [
+      "Oki, a Mol with 99 charm, successfully rode a pony and obtained a matching helmet.  The pony ride was a resounding success.",
+      "Oki, after a successful pony ride, charmed their way into a golden ticket for a larger pony-riding event.  No other players were involved.",
+      "Oki, the Mol, won a ticket to a pony-riding spectacle.  Oki and their pony are anticipating the event.",
+      "Oki fell off their pony during a ride but landed unharmed, much to the amusement of the crowd.  The pony remained unfazed.",
+      "Oki, a Mol, won a magnificent pony and a golden ticket to a pony-riding extravaganza through their charm and speed.  They rode off to the event."
+    ]
+  },
+  "playersStats": {
+    "25": [
+      25,
+      "oki",
+      "mol",
+      34,
+      30,
+      "gleaming helmet, magnificent pony",
+      90,
+      90,
+      130,
+      169,
+      4,
+      59
+    ]
+  }
+}

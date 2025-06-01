@@ -53,10 +53,8 @@ def get_player_stats(cur, player_id: int):
     """Get player stats to use in AI prompt"""
     cur.execute("SELECT * FROM currentGame WHERE id = ?", (player_id,))
     row = cur.fetchone()
-
     if not row:
-        print("Player not found in currentGame.")
-        return
+        return None
     
     return row
 

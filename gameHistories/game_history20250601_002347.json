@@ -1,0 +1,32 @@
+{
+  "story": {
+    "log": [
+      "Oki, a Mol with adequate equipment and above-average stats, arrives at the beach for a survival challenge.  No other contestants are mentioned.",
+      "Oki, the Mol, successfully collected a large number of shells on the beach, exceeding their expectations.",
+      "Oki ate beach sand, experiencing a temporary intelligence boost as a result."
+    ],
+    "theme": "beach"
+  },
+  "playersHistory": {
+    "25": [
+      "Oki, the Mol, successfully collected a large number of shells on the beach, exceeding their expectations.",
+      "Oki ate beach sand, experiencing a temporary intelligence boost as a result."
+    ]
+  },
+  "playersStats": {
+    "25": [
+      25,
+      "oki",
+      "mol",
+      29,
+      50,
+      "90",
+      90,
+      90,
+      90,
+      109,
+      19,
+      59
+    ]
+  }
+}

@@ -1,4 +1,5 @@
 # from google import genai
+import time
 import google.generativeai as genai
 import os # to access env var
 import json
@@ -11,8 +12,12 @@ from datetime import datetime
 from update_stats import get_player_id_by_name, update_equipment, update_stat, print_player_stats, get_player_stats
 import ast # to parse stat deltas
 import re
+# for terminal colors
+from termcolor import colored
+from pyfiglet import figlet_format, Figlet
+from collections import defaultdict
 
-# load env file for the genai
+# load env file for the genaix
 _ = load_dotenv(find_dotenv())
 key = os.environ.get('GEMINI_API_KEY')
 # client = genai.Client(api_key=key)
@@ -29,7 +34,7 @@ storyData = {
 }
 
 # to track individual player history
-player_history = {}
+player_history = defaultdict(list)
 
 """def GenAI(prompt):
     return client.models.generate_content(
@@ -41,9 +46,10 @@ def GenAI(prompt):
     return response.text
 
 # generate a short summary of the outcome
-def simplify_outcome(full_text, player_name):
-    prompt = f"""Summarize this story outcome in one short sentence.
-    Focus on what happened to {player_name}, and mention any player names if involved because that's important, but skip any story fluff.
+def simplify_outcome(topic, full_text, player_name=None):
+    prompt = f"""Summarize this story outcome in one or two short sentences.
+    Focus on what happened to {player_name} if any (if it's blank, then just continue summarizing rest of everything), and mention any player names if involved because that's important, but skip any story fluff.
+    If it's relevant to the topic {topic}, then make sure to mention any key info.
     Outcome: {full_text}"""
     summary = GenAI(prompt)
     return summary.strip()
@@ -54,8 +60,7 @@ def record_story_event(event_text):
 
 # track actions taken by individual player
 def record_player_action(player_id, action_text):
-    if player_id not in player_history:
-        player_history[player_id] = []
+    # store player_history based on ID
     player_history[player_id].append(action_text)
 
 # save game history to a JSON file
@@ -108,15 +113,35 @@ def kill_player(player_id):
     con.commit()
     return 0
 
+def coloredTitle():
+    text = "Cells  &  Serpents"
+    colors = ['red', 'green', 'yellow', 'blue', 'cyan', 'magenta', 'white']
+    f = Figlet(font='small')
+
+    for i in range(len(colors)):
+        art = f.renderText(text)
+        rainbow_art = ""
+        for j, char in enumerate(art):
+            if char == '\n':
+                rainbow_art += char
+            else:
+                color = colors[(i + j) % len(colors)]
+                rainbow_art += colored(char, color)
+        # clear terminal
+        print("\033c", end="")
+        print(rainbow_art)
+
 def main():
+    coloredTitle()
+
     # drop currentGame table if it exists
     cur.execute("DROP TABLE IF EXISTS currentGame")
 
     # welcome message
     player_count = input("""Hello there! Welcome to Cells and Serpents!\nHow many players will be joining today?\nType number here: """)
+    
+    # store all player names involved in this round of game
     playerNames = []
-
-    data = {}
 
     # new database for the game
     cur.execute("CREATE TABLE currentGame (id, name, race, health, gold, equipment, attack, defense, speed, charm, intelligence, magicPowers)")
@@ -136,9 +161,10 @@ def main():
             # retreive number of players for the game
             print("Please define each of your player information...\n")
         
+            # fetch highest id we have right now
+            cur.execute("SELECT MAX(id) FROM game")
             # fetch next index
-            cur.execute("SELECT COUNT(*) FROM game")
-            id = cur.fetchone()[0]
+            id = cur.fetchone()[0] + 1
 
             # store each player's data into the database
             for i in range(player_count):
@@ -183,9 +209,6 @@ def main():
                 # save to playerNames
                 playerNames.append((id, name))
 
-                # initialize player_history for the player
-                player_history[id] = []
-
                 # add data into NEW database
                 cur.execute("""
                     INSERT INTO currentGame (id, name, race, health, gold, equipment, attack, defense, speed, charm, intelligence, magicPowers)
@@ -194,7 +217,7 @@ def main():
                 con.commit()
 
                 print("Player #" + i + " information added\n")
-                # increment id
+                # increment id for the next player
                 id += 1
 
         else:
@@ -203,38 +226,37 @@ def main():
             cur.execute(f"""
                 SELECT id, name FROM game
                 """)
-            data = cur.fetchall()
-            # allow users to pick players from the database TODO
-            for id, name in data:
+            players = cur.fetchall()
+
+            # allow users to pick players from the database
+            for id, name in players:
                 print(id, name)
 
-            i = 0
-            while i != player_count:
-                player = input(f"Please type in the id of Player {i} you want from the list: ")
+            player_num = 0
+            # keep asking what players to include until we finally reach the player_count
+            while player_num != player_count:
+                pInfo = input(f"Please type in the id of Player {player_num} you want from the list: ")
+                
+                # try to find it in the game table
+                cur.execute(f"SELECT * FROM game WHERE id = {pInfo}")
+                playerInfo = cur.fetchone()
 
-                # check if player exists
-                cur.execute(f"""
-                    SELECT * FROM game WHERE id == {player}
-                """)
-                data = cur.fetchall()
-
-                if data is None:
+                # if player isn't found...
+                if playerInfo is None:
                     print("ID doesn't exist in the database. Please try again!")
                 else:
-                    i += 1
+                    # otherwise, increment the player_num
+                    player_num += 1
 
-                    # save player data
+                    # and save the player data into the currentGame table
                     cur.execute("""
                         INSERT INTO currentGame (id, name, race, health, gold, equipment, attack, defense, speed, charm, intelligence, magicPowers)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (data[0][0], data[0][1], data[0][2], data[0][3], 0, data[0][4], data[0][5], data[0][6], data[0][7], data[0][8], data[0][9], data[0][10]))
+                    """, (playerInfo[0], playerInfo[1], playerInfo[2], playerInfo[3], 0, playerInfo[4], playerInfo[5], playerInfo[6], playerInfo[7], playerInfo[8], playerInfo[9], playerInfo[10]))
                     con.commit()
 
-                    # initialize player_history for the player
-                    player_history[data[0][0]] = []
-
                     # save to playerNames
-                    playerNames.append((data[0][0], data[0][1]))
+                    playerNames.append((playerInfo[0], playerInfo[1]))
 
                     print("Saved Successfully")
 
@@ -243,13 +265,11 @@ def main():
         return 0
     
     # gets data of all players in this round of game
-    cur.execute(f"""
-        SELECT * FROM currentGame
-        """)
-    data = cur.fetchall()
+    cur.execute(f"SELECT * FROM currentGame")
+    playersInGame = cur.fetchall()
 
     # prints out all players playing in this round
-    print("Players registered for the game:", data)
+    print("Players registered for the game:", playersInGame)
 
     theme_choice = input("Type a theme for the game: ")
 
@@ -259,56 +279,64 @@ def main():
     # give an opening to the game based on the theme choice players chose
     # allow players to pick choices in their journey
     opening = GenAI(f"""
-        The players in this data {str(data)} is a list of tuples. respectively, one tuple contains id, name, race, health level, equipments the player has, attack level, defense level, speed level, charm level, intelligence level, and magic power level.
-        for the equipment parts, just understand those strings and make sure they are worded in a way it's understandable in human language. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names and stats if you choose to do so,
-        don't add any quotation marks and make sure to capitalize the first letter of their names. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT. also, don't state their id numbers.""")
+        The players in this data {str(playersInGame)} is a list of tuples. respectively, one tuple contains id, name, race, health level, equipments the player has, attack level, defense level, speed level, charm level, intelligence level, and magic power level.
+        for the equipment parts, just understand those strings and make sure they are worded in a way it's understandable in human language. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names,
+        don't add any quotation marks and make sure to capitalize the first letter of their names. you may menion the stats but don't mention any stats numerically - just word them in english. for example, each stat is given 0 - 100 level, with 0 being bad and 100 being good.
+        so just mention how good or bad each player is based on their stats. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT. also, don't state their id numbers.""")
     print("\n" + opening + "\n")
 
+    # summarize opening and call record_story_event
     # store the opening
-    record_story_event(opening)
+    record_story_event(simplify_outcome(theme_choice, opening))
 
     print("Your story...starts NOW!\n")
+
     # start players actions
     while True:
         # ask for each player's actions
-        for player in data:
-            action = input(f"Enter what action {player[1]} wants to do: ")
+        for pInfo in playersInGame:
+            playerName = pInfo[1]
+            playerID = pInfo[0]
+
+            action = input(f"Enter what action {playerName} wants to do: ")
 
             # make sure successNum > success_rate in order to win
             success_rate = random.randint(0, 100)
             successNum = random.randint(0, 100)
-            start_stats = get_player_stats(cur, player[0])
-
-            # print(f"start stats: {start_stats}")
+            start_stats = get_player_stats(cur, pInfo[0])
 
             # produce outcome
             outcome = GenAI(f"""To be successful, success rate: {success_rate} must be < successNum: {successNum}. The amount of favoritism you give
-                               to the user input {player[1]} wishes to have depends on how well that inequality is. The bigger and farther away successNum
+                               to the user input {playerName} wishes to have depends on how well that inequality is. The bigger and farther away successNum
                                is from success rate, the better the outcome is, and worse if vice versa. Use these stats to help make the outcome: {start_stats},
                                which in order correspond to player id (ignore this), name, race, health, gold, equipment, attack, defense, speed, charm, intelligence,
-                               and magic powers. The action {player[1]} wishes to do is: {action}. 
+                               and magic powers. The action {playerName} wishes to do is: {action}. 
                                Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original 
-                               wish of {player[1]} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 
-                               history here - don't go off topic: {storyData['log']}. The player history, if any of {player[1]} is: 
-                               {player_history[player[0]]}. Also, if there are any other players involved in the list {playerNames} besides the current {player[1]}, then
-                               also consider the success rate and how well the action could be executed based on that other player's stats. Search their stats
-                               here: {cur.fetchall()} and match data based on the names. Make sure to give only one clear outcome that reads like a cohesive paragraph.""")
+                               wish of {playerName} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 
+                               history here - don't go off topic: {storyData['log']}. The player history, if any of {playerName} is: 
+                               {player_history[playerID]}. Also, if there are any other players involved in the list {playerNames} besides the current {playerName}, then
+                               also consider the success rate and how well the action could be executed based on other players' stats. Search their stats
+                               here: {playersInGame} and match data based on the names. Make sure to give only one clear outcome that reads like a cohesive paragraph.""")
 
             # summarize the outcome - player history
-            summary = simplify_outcome(outcome, player[1])
+            summary = simplify_outcome(theme_choice, outcome, playerName)
 
-            # save in player history
-            for id, p in playerNames:
-                checkAffectedPlayers = GenAI(f"""check if {outcome} involves {p}. return a single letter T if so, otherwise F""")
+            # record story event
+            record_story_event(summary)
+
+            # first check any affected players from current action
+            for id, pName in playerNames:
+                checkAffectedPlayers = GenAI(f"check if {outcome} involves {pName}. return a single letter T if so, otherwise F")
+                # if affected
                 if checkAffectedPlayers == "T\n":
-                    record_player_action(id, {
-                        "summary": summary
-                    })
+                    # record the player's summary
+                    record_player_action(id, summary)
                     currentp_stats = get_player_stats(cur, id)
                     player_equipment = currentp_stats[5]
 
-                    update_stats = GenAI(f"""Based on this paragraph {outcome}, return a list of estimated numerical stat deltas from -10 to 10
-                                          for {p} in the categories of "health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers". 
+                    # get updated json stats of current player
+                    update_stats = GenAI(f"""Based on this paragraph {outcome}, return a list of estimated numerical stat deltas from -50 to 50
+                                          for {pName} in the categories of "health", "attack", "defense", "speed", "charm", "intelligence", "magicPowers". 
                                           For the category of "gold", the delta is a reasonable amount gained/lost based on the paragraph.
                                           If there is no effect, just assign the category a score of 0.
                                           For the category "equipment", set it as a string that describes what equipment they have after event, 
@@ -316,7 +344,7 @@ def main():
                                           ["gold": 0, "equipment": "old shield", "health": -10, "attack": 1, ...], replacing the square brackets with curly braces.
                                          Please don't give any explanation after - just the formatted JSON.""")
                     
-                    print(f"for player {p}")
+                    print(f"For player {pName}:")
                     print(update_stats)
 
                     # attempt to parse and apply updates
@@ -324,7 +352,6 @@ def main():
                         # Remove triple backticks and markdown syntax if present
                         cleaned_update_stats = re.sub(r"```.*?\n|```", "", update_stats).strip()
                         stat_changes = ast.literal_eval(cleaned_update_stats)
-                        # print(f"stat changes list: {stat_changes}")
                         
                         for stat, delta in stat_changes.items():
                             if stat == "equipment" and stat_changes["equipment"] != 0:
@@ -332,7 +359,7 @@ def main():
                             else:
                                 update_stat(cur, con, id, stat, delta)
                     except Exception as e:
-                        print(f"Error updating stats for {p}: {e}")
+                        print(f"Error updating stats for {pName}: {e}")
 
             # prints outcome
             print(outcome)
