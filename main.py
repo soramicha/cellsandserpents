@@ -36,11 +36,6 @@ storyData = {
 # to track individual player history
 player_history = defaultdict(list)
 
-"""def GenAI(prompt):
-    return client.models.generate_content(
-        model="gemini-2.0-flash", contents=prompt
-    ).text"""
-
 def GenAI(prompt):
     response = genai.GenerativeModel("gemini-1.5-flash").generate_content(prompt)
     return response.text
@@ -88,6 +83,7 @@ def kill_player(player_id):
     if not player:
         print(f"No player found with id {player_id}")
         return
+    
     # set up for story
     name = player[1]
     health = player[2]
@@ -353,7 +349,7 @@ def main():
                                 update_stat(cur, con, id, stat, delta)
                     except Exception as e:
                         print(f"Error updating stats for {pName}: {e}")
-
+        
             # prints outcome
             print(outcome)
 
@@ -366,10 +362,7 @@ def main():
             if row:
                 print(f"{playerName} has reached 0 health or below and died, let's see what happened.")
                 kill_player(playerID)
-
-                # remove player from currentGame
-                cur.execute("DELETE FROM currentGame WHERE id = ?", (playerID,))
-
+                
                 # remove from playerNames as well
                 playerNames.remove((playerID, playerName))
 
