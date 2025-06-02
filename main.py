@@ -16,6 +16,8 @@ import re
 from termcolor import colored
 from pyfiglet import figlet_format, Figlet
 from collections import defaultdict
+from encounter import dice_roll
+import random
 
 # load env file for the genaix
 _ = load_dotenv(find_dotenv())
@@ -105,7 +107,6 @@ def kill_player(player_id):
 
 
     # delete the player
-
     cur.execute("DELETE FROM currentGame WHERE id = ?", (player_id,))
     con.commit()
     return 0
@@ -128,6 +129,8 @@ def coloredTitle():
         print("\033c", end="")
         print(rainbow_art)
 
+# magenta = ai generated prompt
+# cyan = outcome of player
 def main():
     coloredTitle()
 
@@ -150,7 +153,6 @@ def main():
         if player_count == 0:
             print("0 players. I see...how sad. Game session ending...")
             return 0
-        
         pickFromPreset = input(f"{player_count} players I see! Awesome, would you like to pick those characters from our preset character set? (Y/N) ")
 
 
@@ -214,7 +216,7 @@ def main():
 
         else:
             print("Okay let's get straight into choosing from the preset characters then!\n")
-
+        
             cur.execute(f"""
                 SELECT id, name FROM game
                 """)
@@ -256,6 +258,7 @@ def main():
         print("What you typed wasn't an integer. Ending session...")
         return 0
     
+
     # gets data of all players in this round of game
     cur.execute(f"SELECT * FROM currentGame")
     playersInGame = cur.fetchall()
@@ -275,13 +278,11 @@ def main():
         for the equipment parts, just understand those strings and make sure they are worded in a way it's understandable in human language. give a small opening paragraph for those players entering a surivival game based on the theme: {theme_choice}. when typing their names,
         don't add any quotation marks and make sure to capitalize the first letter of their names. you may menion the stats but don't mention any stats numerically - just word them in english. for example, each stat is given 0 - 100 level, with 0 being bad and 100 being good.
         so just mention how good or bad each player is based on their stats. make the opening funny too. for example, if a player is weak based on their stats, just say so and be direct and make fun of their levels and for people who are stronger, praise them A LOT. also, don't state their id numbers.""")
-    print("\n" + opening + "\n")
+    print("\n" + colored(opening, "magenta") + "\n")
 
     # summarize opening and call record_story_event
     # store the opening
     record_story_event(simplify_outcome(theme_choice, opening))
-
-    print("Your story...starts NOW!\n")
 
     # start players actions
     while True:
@@ -317,7 +318,6 @@ def main():
             record_story_event(summary)
 
             """ CHECK FOR ANY AFFECTED PLAYERS AND UPDATE EVERYONE'S STATS AS NECESSARY """
-            # TODO UPDATING STATS IS IFFY
             # first check any affected players from current action
             for id, pName in playerNames:
                 checkAffectedPlayers = GenAI(f"check if {outcome} involves {pName}. return a single letter T if so, otherwise F")
@@ -327,7 +327,7 @@ def main():
                     record_player_action(id, summary)
 
                     currentp_stats = get_player_stats(cur, id)
-                    print("current stats", currentp_stats)
+                    print("\nCurrent stats", currentp_stats)
                     player_equipment = currentp_stats[4]
 
                     # get updated json stats of current player
@@ -338,11 +338,13 @@ def main():
                                           For the category "equipment", set it as a string that describes what equipment they have after event, 
                                           based off of their previous equipment {player_equipment}. Make sure to keep any previous equipment if it's not used or broken, etc. If there's an empty string for player equipment,
                                           that just means the player had no equipment before, so don't worry about keeping any previous equipment.
+                                          Remember is someone is stealing something from another player the player who stole it should gain it and the
+                                          player that was stolen from should lose it.
                                           Please return in the format of a proper JSON list such as 
                                           ["gold": 0, "equipment": "old shield", "health": -10], replacing the square brackets with curly braces.
                                          Please don't give any explanation after - just the formatted JSON.""")
                     
-                    print(f"For player {pName}:")
+                    print(f"Stat changes for player {pName}:")
                     print(update_stats)
 
                     # attempt to parse and apply updates
@@ -350,30 +352,100 @@ def main():
                         # Remove triple backticks and markdown syntax if present
                         cleaned_update_stats = re.sub(r"```.*?\n|```", "", update_stats).strip()
                         stat_changes = ast.literal_eval(cleaned_update_stats)
-                        print(stat_changes, "are the stat changes for", pName)
                         for stat, delta in stat_changes.items():
                             if stat == "equipment" and stat_changes["equipment"] != 0:
                                 update_equipment(cur, con, id, stat_changes["equipment"])
                             else:
-                                print("updating", stat, "by", delta)
                                 update_stat(cur, con, id, stat, delta)
                                 cur.execute("SELECT * FROM currentGame WHERE id == ?", (id,))
                                 ifn = cur.fetchone()
-                                print("updated", stat, "By", delta, "for", pName, ifn)
+                                print("Updated", stat, "by", delta, "for", pName, ifn, "\n")
                     except Exception as e:
                         print(f"Error updating stats for {pName}: {e}")
 
-                    # test REMOVE LATER TODO
-                    cur.execute("SELECT * FROM currentGame WHERE id == ?", (id,))
-                    ifn = cur.fetchone()
-                    print("FINISHED UPDATED STATS FOR", pName, ifn)
-
             # prints outcome
-            print(outcome)
+            print(colored(outcome, "cyan"))
+
+            """ RANDOM ENCOUNTER """
+            # decide whether a random encounter will occur for this player
+            if random.randint(1, 20) >= 15:
+                # if so, then first generate a random encounter prompt
+                print(f"\n\n{playerName} has run into a random encounter lets see what has happened")
+                print(colored(GenAI(f"""Generate a random dramatic encounter (1 paragraph is sufficient)
+                            just like how it works in DnD for {playerName} in a creative matter, following
+                            closely to the topic/summary: {storyData['log']}. The player history, if any of {playerName} is: 
+                            {player_history[playerID]}."""), "magenta"))
+                
+                # then ask for user input
+                action = input(f"Enter what action {playerName} wants to do: ")
+
+                # dice roll to determine success
+                input(f"Press Enter to roll the dice to determine your success!")
+                successNum = dice_roll()
+                
+                outcome = GenAI(f"""To be successful, the percentage of ({successNum} / 20) is the likelihood of getting a positive outcome from a user action. The amount of favoritism you give
+                to the user input {playerName} wishes to have depends on that percentage. Use these stats to help make the outcome: {start_stats},
+                which in order correspond to player id (ignore this), name, health, gold, equipment, attack, defense, speed, charm, and intelligence. The action {playerName} wishes to do is: {action}. 
+                Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original 
+                wish of {playerName} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 
+                history here - don't go off topic: {storyData['log']}. The player history, if any of {playerName} is: 
+                {player_history[playerID]}. Also, if there are any other players involved in the list {playerNames} besides the current {playerName}, then
+                also consider the success rate and how well the action could be executed based on other players' stats. Search their stats
+                here: {playersInGame} and match data based on the names. Make sure to give only one clear outcome that reads like a cohesive paragraph.""")
+
+                # summarize the outcome - player history
+                summary = simplify_outcome(outcome, {playerName})
+
+                # save in player history
+                for id, p in playerNames:
+                    checkAffectedPlayers = GenAI(f"""check if {outcome} involves {p}. return a single letter T if so, otherwise F""")
+                    if checkAffectedPlayers == "T\n":
+                        # record the player's summary
+                        record_player_action(id, summary)
+
+                        currentp_stats = get_player_stats(cur, id)
+                        print("\nCurrent stats", currentp_stats)
+                        player_equipment = currentp_stats[4]
+
+                        # get updated json stats of current player
+                        update_stats = GenAI(f"""Based on this paragraph {outcome}, return a list of estimated numerical stat deltas from -50 to 50
+                                            for {pName} in the category of "health". 
+                                            For the category of "gold", the delta is a reasonable amount gained/lost based on the paragraph.
+                                            If there is no effect, just assign the category a score of 0.
+                                            For the category "equipment", set it as a string that describes what equipment they have after event, 
+                                            based off of their previous equipment {player_equipment}. Make sure to keep any previous equipment if it's not used or broken, etc. If there's an empty string for player equipment,
+                                            that just means the player had no equipment before, so don't worry about keeping any previous equipment.
+                                            Remember is someone is stealing something from another player the player who stole it should gain it and the
+                                            player that was stolen from should lose it.
+                                            Please return in the format of a proper JSON list such as 
+                                            ["gold": 0, "equipment": "old shield", "health": -10], replacing the square brackets with curly braces.
+                                            Please don't give any explanation after - just the formatted JSON.""")
+                        
+                        print(f"For player {pName}:")
+                        print(update_stats)
+
+                        # attempt to parse and apply updates
+                        try:
+                            # Remove triple backticks and markdown syntax if present
+                            cleaned_update_stats = re.sub(r"```.*?\n|```", "", update_stats).strip()
+                            stat_changes = ast.literal_eval(cleaned_update_stats)
+                            for stat, delta in stat_changes.items():
+                                if stat == "equipment" and stat_changes["equipment"] != 0:
+                                    update_equipment(cur, con, id, stat_changes["equipment"])
+                                else:
+                                    update_stat(cur, con, id, stat, delta)
+                                    cur.execute("SELECT * FROM currentGame WHERE id == ?", (id,))
+                                    ifn = cur.fetchone()
+                                    print("Updated", stat, "by", delta, "for", pName, ifn)
+                        except Exception as e:
+                            print(f"Error updating stats for {pName}: {e}")
+
+                # prints outcome
+                print(colored(outcome, "cyan"))
 
             """ CHECK FOR DEATHS """
             # check if the player dies
-            cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
+            '''cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
             row = cur.fetchone()
             print("health of", playerName, row[3])
             if row[3] <= 0:
@@ -385,11 +457,22 @@ def main():
 
                 # update - get of all players in this round of game
                 cur.execute(f"SELECT * FROM currentGame")
-                playersInGame = cur.fetchall()
+                playersInGame = cur.fetchall()'''
+            
+
+            cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
+            dead = cur.fetchall()
+            if dead:
+                print(colored("The following players have died, lets see what happened", "red"))
+                for dId, dName in dead:
+                    print(f"{dName} has reached 0 health or below and died, let's see what happened.")
+                    kill_player(dId)
+                    if (dId, dName) in playerNames:
+                        playerNames.remove((dId, dName))
 
         # if there are still more remaining players in the game, make sure to continue
         if playersInGame != []:
-            uInput = input("Type 'end' to save the story and end the game: ")
+            uInput = input("Type 'end' to save the story and end the game otherwise press enter: ")
             if uInput == "end":
                 break
         else:
