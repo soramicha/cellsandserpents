@@ -76,7 +76,7 @@ def save_game_history():
         }, f, indent=2)
 
 def kill_player(player_id):
-    # fetch player from database
+    # fetch player from data
     cur.execute("SELECT * FROM currentGame WHERE id = ?", (player_id,))
     player = cur.fetchone()
 
@@ -103,7 +103,9 @@ def kill_player(player_id):
     print("Death Report:")
     print(story)
 
+
     # delete the player
+
     cur.execute("DELETE FROM currentGame WHERE id = ?", (player_id,))
     con.commit()
     return 0
