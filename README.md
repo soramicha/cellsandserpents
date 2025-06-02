@@ -6,6 +6,7 @@
 ```bash
 pip3 install google-genai
 pip3 install python-dotenv
+pip install pyfiglet termcolor # this is for terminal font and color
 ```
 
 ### Set Up (for mac):
@@ -13,5 +14,6 @@ pip3 install python-dotenv
 python3 -m venv venv
 source venv/bin/activate
 pip install google-generativeai
+pip install pyfiglet termcolor
 python main.py
 ```

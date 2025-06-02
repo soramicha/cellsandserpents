@@ -10,15 +10,15 @@ cur = con.cursor()
 
 # create our table in the database
 # currently commented out because it's been created, but if you haven't done it on your end, uncomment this to create your table
-cur.execute("CREATE TABLE game(id, name, race, gold, health, equipment, attack, defense, speed, charm, intelligence, magicPowers)")
+cur.execute("CREATE TABLE game(id, name, gold, health, equipment, attack, defense, speed, charm, intelligence)")
 
 # insert dummy data
 cur.execute("""
     INSERT INTO game VALUES
-        (0, 'Sophia', 'Fairy', 0, 100, 'sword, shield', 80, 30, 40, 30, 40, 70),
-        (1, 'Angela', 'Human', 0, 100, '', 20, 50, 40, 90, 80, 50),
-        (2, 'Bri', 'Hunter', 0, 100, 'bow, arrows', 80, 30, 40, 30, 40, 70),
-        (3, 'Amanda', 'Hunter', 0, 100, 'bow, arrows', 80, 30, 40, 30, 40, 70)
+        (0, 'Sophia', 0, 100, 'sword, shield', 80, 30, 40, 30, 40),
+        (1, 'Angela', 0, 100, '', 20, 50, 40, 90, 80),
+        (2, 'Bri', 0, 100, 'bow, arrows', 80, 30, 40, 30, 40),
+        (3, 'Amanda', 0, 100, 'bow, arrows', 80, 30, 40, 30, 40)
 """)
 con.commit()
 
