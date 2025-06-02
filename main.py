@@ -105,7 +105,6 @@ def kill_player(player_id):
     print("Death Report:")
     print(story)
 
-
     # delete the player
     cur.execute("DELETE FROM currentGame WHERE id = ?", (player_id,))
     con.commit()
@@ -366,11 +365,27 @@ def main():
             # prints outcome
             print(colored(outcome, "cyan"))
 
+            """ CHECK FOR DEATHS """
+            # check if the player dies
+            cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
+            dead = cur.fetchall()
+            if dead:
+                print(colored("The following players have died, lets see what happened", "red"))
+                for dId, dName in dead:
+                    print(f"{dName} has reached 0 health or below and died, let's see what happened.")
+                    kill_player(dId)
+                    if (dId, dName) in playerNames:
+                        playerNames.remove((dId, dName))
+
+                # update - get of all players in this round of game
+                cur.execute(f"SELECT * FROM currentGame")
+                playersInGame = cur.fetchall()
+
             """ RANDOM ENCOUNTER """
             # decide whether a random encounter will occur for this player
             if random.randint(1, 20) >= 15:
                 # if so, then first generate a random encounter prompt
-                print(f"\n\n{playerName} has run into a random encounter lets see what has happened")
+                print(f"\n\n{playerName} has run into a random encounter!\n")
                 print(colored(GenAI(f"""Generate a random dramatic encounter (1 paragraph is sufficient)
                             just like how it works in DnD for {playerName} in a creative matter, following
                             closely to the topic/summary: {storyData['log']}. The player history, if any of {playerName} is: 
@@ -442,33 +457,6 @@ def main():
 
                 # prints outcome
                 print(colored(outcome, "cyan"))
-
-            """ CHECK FOR DEATHS """
-            # check if the player dies
-            '''cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
-            row = cur.fetchone()
-            print("health of", playerName, row[3])
-            if row[3] <= 0:
-                print(f"{playerName} has reached 0 health or below and died, let's see what happened.")
-                kill_player(playerID)
-                
-                # remove from playerNames as well
-                playerNames.remove((playerID, playerName))
-
-                # update - get of all players in this round of game
-                cur.execute(f"SELECT * FROM currentGame")
-                playersInGame = cur.fetchall()'''
-            
-
-            cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
-            dead = cur.fetchall()
-            if dead:
-                print(colored("The following players have died, lets see what happened", "red"))
-                for dId, dName in dead:
-                    print(f"{dName} has reached 0 health or below and died, let's see what happened.")
-                    kill_player(dId)
-                    if (dId, dName) in playerNames:
-                        playerNames.remove((dId, dName))
 
         # if there are still more remaining players in the game, make sure to continue
         if playersInGame != []:
