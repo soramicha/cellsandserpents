@@ -1,0 +1,20 @@
+{
+  "story": {
+    "log": [
+      "Nori, with weak stats, faces Bri, a strong and well-rounded player, in a beach volleyball competition. Bri is heavily favored to win.",
+      "Nori, playing beach volleyball against Bri, lost a close match despite unexpectedly strong defense.  Bri's superior skills ultimately secured her victory.",
+      "Bri lost her beach volleyball match but won 105 gold pieces;  she's determined to improve and win future competitions."
+    ],
+    "theme": "beach volleyball"
+  },
+  "playersHistory": {
+    "4": [
+      "Nori, playing beach volleyball against Bri, lost a close match despite unexpectedly strong defense.  Bri's superior skills ultimately secured her victory."
+    ],
+    "2": [
+      "Nori, playing beach volleyball against Bri, lost a close match despite unexpectedly strong defense.  Bri's superior skills ultimately secured her victory.",
+      "Bri lost her beach volleyball match but won 105 gold pieces;  she's determined to improve and win future competitions."
+    ]
+  },
+  "playersStats": {}
+}

@@ -94,10 +94,11 @@ def kill_player(player_id):
     charm = player[7]
     intelligence = player[8]
 
-    story = GenAI(f"""A character named {name} has tragically died in the cells and serpants, here are their stats:
+    story = GenAI(f"""A character named {name} has tragically died in the story: {storyData['log']}, here are their stats:
                   -Health: {health} -Equipment: {equipment} -Attack: {attack} -Defense: {defense} -Speed: {speed}
                     -Charm: {charm} -Intelligence: {intelligence}
-                    Based on these stats please write one short, over the top, dramatic, and very brutal paragraph on how they died""")
+                    Based on these stats and the storyline please write one short, over the top, dramatic, and very brutal paragraph (if necessary) on how they died.
+                    Don't get off topic from the story!""")
     
     print("Death Report:")
     print(story)
@@ -241,7 +242,7 @@ def main():
                     cur.execute("""
                         INSERT INTO currentGame (id, name, health, gold, equipment, attack, defense, speed, charm, intelligence)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (playerInfo[0], playerInfo[1], playerInfo[2], playerInfo[3], 0, playerInfo[4], playerInfo[5], playerInfo[6], playerInfo[7], playerInfo[8]))
+                    """, (playerInfo[0], playerInfo[1], playerInfo[2], playerInfo[3], playerInfo[4], playerInfo[5], playerInfo[6], playerInfo[7], playerInfo[8], playerInfo[9]))
                     con.commit()
 
                     # save to playerNames
@@ -284,10 +285,11 @@ def main():
     while True:
         # ask for each player's actions
         for pInfo in playersInGame:
-            playerName = pInfo[1]
+            """ CREATE OUTCOME FOR EACH PLAYER """
             playerID = pInfo[0]
+            playerName = pInfo[1]
 
-            action = input(f"Enter what action {playerName} wants to do: ")
+            action = input(f"Enter an action {playerName} wants to do: ")
 
             # make sure successNum > success_rate in order to win
             success_rate = random.randint(0, 100)
@@ -312,6 +314,8 @@ def main():
             # record story event
             record_story_event(summary)
 
+            """ CHECK FOR ANY AFFECTED PLAYERS AND UPDATE EVERYONE'S STATS AS NECESSARY """
+            # TODO UPDATING STATS IS IFFY
             # first check any affected players from current action
             for id, pName in playerNames:
                 checkAffectedPlayers = GenAI(f"check if {outcome} involves {pName}. return a single letter T if so, otherwise F")
@@ -319,18 +323,21 @@ def main():
                 if checkAffectedPlayers == "T\n":
                     # record the player's summary
                     record_player_action(id, summary)
+
                     currentp_stats = get_player_stats(cur, id)
                     print("current stats", currentp_stats)
-                    player_equipment = currentp_stats[5]
+                    player_equipment = currentp_stats[4]
 
                     # get updated json stats of current player
                     update_stats = GenAI(f"""Based on this paragraph {outcome}, return a list of estimated numerical stat deltas from -50 to 50
-                                          for {pName} in the categories of "health", "attack", "defense", "speed", "charm", "intelligence". 
+                                          for {pName} in the category of "health". 
                                           For the category of "gold", the delta is a reasonable amount gained/lost based on the paragraph.
                                           If there is no effect, just assign the category a score of 0.
                                           For the category "equipment", set it as a string that describes what equipment they have after event, 
-                                          based off of their previous equipment {player_equipment}. Please return in the format of a proper JSON list such as 
-                                          ["gold": 0, "equipment": "old shield", "health": -10, "attack": 1, ...], replacing the square brackets with curly braces.
+                                          based off of their previous equipment {player_equipment}. Make sure to keep any previous equipment if it's not used or broken, etc. If there's an empty string for player equipment,
+                                          that just means the player had no equipment before, so don't worry about keeping any previous equipment.
+                                          Please return in the format of a proper JSON list such as 
+                                          ["gold": 0, "equipment": "old shield", "health": -10], replacing the square brackets with curly braces.
                                          Please don't give any explanation after - just the formatted JSON.""")
                     
                     print(f"For player {pName}:")
@@ -341,25 +348,33 @@ def main():
                         # Remove triple backticks and markdown syntax if present
                         cleaned_update_stats = re.sub(r"```.*?\n|```", "", update_stats).strip()
                         stat_changes = ast.literal_eval(cleaned_update_stats)
-                        
+                        print(stat_changes, "are the stat changes for", pName)
                         for stat, delta in stat_changes.items():
                             if stat == "equipment" and stat_changes["equipment"] != 0:
                                 update_equipment(cur, con, id, stat_changes["equipment"])
                             else:
+                                print("updating", stat, "by", delta)
                                 update_stat(cur, con, id, stat, delta)
+                                cur.execute("SELECT * FROM currentGame WHERE id == ?", (id,))
+                                ifn = cur.fetchone()
+                                print("updated", stat, "By", delta, "for", pName, ifn)
                     except Exception as e:
                         print(f"Error updating stats for {pName}: {e}")
-        
+
+                    # test REMOVE LATER TODO
+                    cur.execute("SELECT * FROM currentGame WHERE id == ?", (id,))
+                    ifn = cur.fetchone()
+                    print("FINISHED UPDATED STATS FOR", pName, ifn)
+
             # prints outcome
             print(outcome)
 
+            """ CHECK FOR DEATHS """
             # check if the player dies
-            cur.execute("SELECT * FROM currentGame WHERE id = ? AND health <= 0", (playerID,))
+            cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
             row = cur.fetchone()
-
-            print(row, "Is the current stats") # TODO the updating of equipment and stats aren't correct
-            
-            if row:
+            print("health of", playerName, row[3])
+            if row[3] <= 0:
                 print(f"{playerName} has reached 0 health or below and died, let's see what happened.")
                 kill_player(playerID)
                 

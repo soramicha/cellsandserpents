@@ -6,7 +6,7 @@ Changes Sophia Made to the Game:
 - assigned all starting health default to 100
 - now the game ends when there aren't alive players left
 
-# update stats and equipment - inconsistent
+# CURRENT PROBLEM: updating stats for players affected isn't working well and so is the equipment update
 
 Improvements WE COULD MAKE:
 - load game history back into the game

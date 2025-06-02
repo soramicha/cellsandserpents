@@ -18,7 +18,7 @@ def update_equipment(cur, con, player_id: int, new_equipment: str):
 
 def update_stat(cur, con, player_id: int, field: str, delta: int):
     """Update the given field of the given player by delta (numerical only)"""
-    allowed_fields = {"gold", "health", "attack", "defense", "speed", "charm", "intelligence"}
+    allowed_fields = {"gold", "health"}
 
     if field not in allowed_fields:
         raise ValueError(f"'{field}' is not a valid updatable stat.")
