@@ -383,7 +383,7 @@ def main():
 
             """ RANDOM ENCOUNTER """
             # decide whether a random encounter will occur for this player
-            if random.randint(1, 20) >= 15:
+            if random.randint(1, 20) >= 15 and (playerID, playerName) in playerNames:
                 # if so, then first generate a random encounter prompt
                 print(f"\n\n{playerName} has run into a random encounter!\n")
                 print(colored(GenAI(f"""Generate a random dramatic encounter (1 paragraph is sufficient)
@@ -399,7 +399,7 @@ def main():
                 successNum = dice_roll()
                 
                 outcome = GenAI(f"""To be successful, the percentage of ({successNum} / 20) is the likelihood of getting a positive outcome from a user action. The amount of favoritism you give
-                to the user input {playerName} wishes to have depends on that percentage. Use these stats to help make the outcome: {start_stats},
+                to the user input {playerName} wishes to have depends on that percentage. If it's less than 10, then obviously the action the player wants will FAIL. Use these stats to help make the outcome: {start_stats},
                 which in order correspond to player id (ignore this), name, health, gold, equipment, attack, defense, speed, charm, and intelligence. The action {playerName} wishes to do is: {action}. 
                 Give a few sentences-long outcome based on this (write it in a casual personified way), and make sure to state the original 
                 wish of {playerName} in a creative manner. don't include anything about success rates! Give it appropriately based on the story 

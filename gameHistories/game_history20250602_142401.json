@@ -1,0 +1,56 @@
+{
+  "story": {
+    "log": [
+      "In the 2242 Survive-or-Die-Trying war games, Sophia (sword and shield), Angela (unarmed, high charm), and Bri (bow and arrow) entered the arena.  No one was eliminated.",
+      "Sophia injured Bri and accidentally grazed Angela during a chaotic battle.  The fight's outcome was a partial success for Sophia.",
+      "Angela defeated Bri in a duel, using superior speed and agility to overcome Bri's bow attacks.  Sophia's earlier accidental graze seemingly motivated Angela.",
+      "Bri tripped and fell, sustaining only a minor scrape.  This was a fortunate outcome given her recent string of defeats against Angela and Sophia in battles.",
+      "Sophia and Angela fought a draw, with Angela's superior speed and charm offsetting Sophia's stronger attack.  Neither warrior was decisively defeated.",
+      "Angela and Sophia fought a fierce battle that ended in a draw, with Sophia's superior defense offsetting Angela's speed and charm.",
+      "Sophia heavily injured Angela in battle, but Angela's high defense and health prevented a decisive victory.  The rivalry continues.",
+      "Angela tripped, but her high charm and intelligence let her recover quickly and unharmed.  The incident added comedic chaos to her journey."
+    ],
+    "theme": "war"
+  },
+  "playersHistory": {
+    "0": [
+      "Sophia injured Bri and accidentally grazed Angela during a chaotic battle.  The fight's outcome was a partial success for Sophia.",
+      "Angela defeated Bri in a duel, using superior speed and agility to overcome Bri's bow attacks.  Sophia's earlier accidental graze seemingly motivated Angela.",
+      "Bri tripped and fell, sustaining only a minor scrape.  This was a fortunate outcome given her recent string of defeats against Angela and Sophia in battles.",
+      "Sophia and Angela fought a draw, with Angela's superior speed and charm offsetting Sophia's stronger attack.  Neither warrior was decisively defeated.",
+      "Angela and Sophia fought a fierce battle that ended in a draw, with Sophia's superior defense offsetting Angela's speed and charm.",
+      "Sophia heavily injured Angela in battle, but Angela's high defense and health prevented a decisive victory.  The rivalry continues.",
+      "Angela, using charm, successfully obtained gold coins from Sophia.  The outcome resulted in Angela gaining additional gold."
+    ],
+    "1": [
+      "Sophia injured Bri and accidentally grazed Angela during a chaotic battle.  The fight's outcome was a partial success for Sophia.",
+      "Angela defeated Bri in a duel, using superior speed and agility to overcome Bri's bow attacks.  Sophia's earlier accidental graze seemingly motivated Angela.",
+      "Angela decisively defeated Bri in a fight using unarmed combat, leaving Bri bruised and weakened.  The outcome was a victory for Angela.",
+      "Bri tripped and fell, sustaining only a minor scrape.  This was a fortunate outcome given her recent string of defeats against Angela and Sophia in battles.",
+      "Sophia and Angela fought a draw, with Angela's superior speed and charm offsetting Sophia's stronger attack.  Neither warrior was decisively defeated.",
+      "Angela and Sophia fought a fierce battle that ended in a draw, with Sophia's superior defense offsetting Angela's speed and charm.",
+      "Sophia heavily injured Angela in battle, but Angela's high defense and health prevented a decisive victory.  The rivalry continues.",
+      "Angela tripped, but her high charm and intelligence let her recover quickly and unharmed.  The incident added comedic chaos to her journey."
+    ],
+    "2": [
+      "Sophia injured Bri and accidentally grazed Angela during a chaotic battle.  The fight's outcome was a partial success for Sophia.",
+      "Angela defeated Bri in a duel, using superior speed and agility to overcome Bri's bow attacks.  Sophia's earlier accidental graze seemingly motivated Angela.",
+      "Angela decisively defeated Bri in a fight using unarmed combat, leaving Bri bruised and weakened.  The outcome was a victory for Angela.",
+      "Bri tripped and fell, sustaining only a minor scrape.  This was a fortunate outcome given her recent string of defeats against Angela and Sophia in battles."
+    ]
+  },
+  "playersStats": {
+    "0": [
+      0,
+      "Sophia",
+      65,
+      15,
+      "sword, shield",
+      80,
+      30,
+      40,
+      30,
+      40
+    ]
+  }
+}
