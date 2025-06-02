@@ -134,6 +134,8 @@ def main():
     # drop currentGame table if it exists
     cur.execute("DROP TABLE IF EXISTS currentGame")
 
+
+
     # welcome message
     player_count = input("""Hello there! Welcome to Cells and Serpents!\nHow many players will be joining today?\nType number here: """)
     
@@ -150,7 +152,6 @@ def main():
         if player_count == 0:
             print("0 players. I see...how sad. Game session ending...")
             return 0
-        
         pickFromPreset = input(f"{player_count} players I see! Awesome, would you like to pick those characters from our preset character set? (Y/N) ")
 
 
@@ -214,7 +215,7 @@ def main():
 
         else:
             print("Okay let's get straight into choosing from the preset characters then!\n")
-
+        
             cur.execute(f"""
                 SELECT id, name FROM game
                 """)
@@ -256,6 +257,7 @@ def main():
         print("What you typed wasn't an integer. Ending session...")
         return 0
     
+
     # gets data of all players in this round of game
     cur.execute(f"SELECT * FROM currentGame")
     playersInGame = cur.fetchall()
@@ -338,6 +340,8 @@ def main():
                                           For the category "equipment", set it as a string that describes what equipment they have after event, 
                                           based off of their previous equipment {player_equipment}. Make sure to keep any previous equipment if it's not used or broken, etc. If there's an empty string for player equipment,
                                           that just means the player had no equipment before, so don't worry about keeping any previous equipment.
+                                          Remember is someone is stealing something from another player the player who stole it should gain it and the
+                                          player that was stolen from should lose it.
                                           Please return in the format of a proper JSON list such as 
                                           ["gold": 0, "equipment": "old shield", "health": -10], replacing the square brackets with curly braces.
                                          Please don't give any explanation after - just the formatted JSON.""")
@@ -363,27 +367,22 @@ def main():
                     except Exception as e:
                         print(f"Error updating stats for {pName}: {e}")
 
-                    # test REMOVE LATER TODO
-                    cur.execute("SELECT * FROM currentGame WHERE id == ?", (id,))
-                    ifn = cur.fetchone()
-                    print("FINISHED UPDATED STATS FOR", pName, ifn)
 
             # prints outcome
             print(outcome)
 
             """ CHECK FOR DEATHS """
             # check if the player dies
-            cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
-            row = cur.fetchone()
-            print("health of", playerName, row[3])
-            if row[3] <= 0:
-                print(f"{playerName} has reached 0 health or below and died, let's see what happened.")
-                kill_player(playerID)
-                
-                # remove from playerNames as well
-                playerNames.remove((playerID, playerName))
+            cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
+            dead = cur.fetchall()
+            if dead:
+                print("The following players have died, lets see what happened")
+                for id, name in dead:
+                    print(f"{name} has reached 0 health or below and died, let's see what happened.")
+                    kill_player(id)
+                    playerNames.remove(id, name)
 
-                # update - get of all players in this round of game
+                # get all players in this round    
                 cur.execute(f"SELECT * FROM currentGame")
                 playersInGame = cur.fetchall()
 

@@ -28,7 +28,6 @@ def update_stat(cur, con, player_id: int, field: str, delta: int):
         SET {field} = {field} + ?
         WHERE id = ?
     """
-
     cur.execute(query, (delta, player_id))
     con.commit()
 

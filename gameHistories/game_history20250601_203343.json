@@ -1,0 +1,32 @@
+{
+  "story": {
+    "log": [
+      "A beach battle royale commences, with Bri (high health, decent attack/defense, high intelligence, low speed) as one of the contestants.",
+      "Bri, the only combatant in a beach battle royale, self-harmed to lower her health.  Her attempt was successful, resulting in a significant but non-fatal health reduction.",
+      "Bri, recovering from a battle, received a generous sum of gold from a kindly merchant.  She left with significantly more wealth.",
+      "Bri bought a superior bow and quiver at the market, upgrading her archery arsenal.  She's now ready for any challenges, especially those on the beach."
+    ],
+    "theme": "beach"
+  },
+  "playersHistory": {
+    "2": [
+      "Bri, the only combatant in a beach battle royale, self-harmed to lower her health.  Her attempt was successful, resulting in a significant but non-fatal health reduction.",
+      "Bri, recovering from a battle, received a generous sum of gold from a kindly merchant.  She left with significantly more wealth.",
+      "Bri bought a superior bow and quiver at the market, upgrading her archery arsenal.  She's now ready for any challenges, especially those on the beach."
+    ]
+  },
+  "playersStats": {
+    "2": [
+      2,
+      "Bri",
+      65,
+      30,
+      "magnificent new bow, quiver, extra arrows, previous bow, previous arrows",
+      80,
+      30,
+      40,
+      30,
+      40
+    ]
+  }
+}
