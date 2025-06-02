@@ -134,8 +134,6 @@ def main():
     # drop currentGame table if it exists
     cur.execute("DROP TABLE IF EXISTS currentGame")
 
-
-
     # welcome message
     player_count = input("""Hello there! Welcome to Cells and Serpents!\nHow many players will be joining today?\nType number here: """)
     
@@ -367,22 +365,22 @@ def main():
                     except Exception as e:
                         print(f"Error updating stats for {pName}: {e}")
 
-
             # prints outcome
             print(outcome)
 
             """ CHECK FOR DEATHS """
             # check if the player dies
-            cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
-            dead = cur.fetchall()
-            if dead:
-                print("The following players have died, lets see what happened")
-                for id, name in dead:
-                    print(f"{name} has reached 0 health or below and died, let's see what happened.")
-                    kill_player(id)
-                    playerNames.remove(id, name)
+            cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
+            row = cur.fetchone()
+            print("health of", playerName, row[3])
+            if row[3] <= 0:
+                print(f"{playerName} has reached 0 health or below and died, let's see what happened.")
+                kill_player(playerID)
+                
+                # remove from playerNames as well
+                playerNames.remove((playerID, playerName))
 
-                # get all players in this round    
+                # update - get of all players in this round of game
                 cur.execute(f"SELECT * FROM currentGame")
                 playersInGame = cur.fetchall()
 
