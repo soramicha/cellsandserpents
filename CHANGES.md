@@ -5,6 +5,7 @@ Changes Sophia Made to the Game:
 - removed the 'race' and 'magicPower' columns in all games because it's unnecessary towards the story game
 - assigned all starting health default to 100
 - now the game ends when there aren't alive players left
+- only allow stat updates of health and gold and equipment!
 
 # CURRENT PROBLEM: updating stats for players affected isn't working well and so is the equipment update
 
