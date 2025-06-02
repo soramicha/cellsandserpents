@@ -1,0 +1,54 @@
+{
+  "story": {
+    "log": [
+      "Angela, with low stats, and Bri, with high attack and health, entered the Forest of Fickle Fate.  Bri is expected to dominate.",
+      "Angela unsuccessfully attacked Bri, her weaker stats proving insufficient to harm Bri's high health.  Bri remained unharmed.",
+      "Bri playfully shot an arrow near Angela, a symbolic attack that caused no real harm; the forest's luck favored Angela in this uneven fight.",
+      "Angela, aided by the Forest of Fickle Fate, successfully landed a blow on Bri, reducing Bri's health and forcing a reevaluation of Angela's capabilities.",
+      "Bri attempted self-destruction, but the forest intervened, allowing her arrow to only graze her arm.  After this near-death experience, Bri chose to meditate and adjust her strategy."
+    ],
+    "theme": "forest"
+  },
+  "playersHistory": {
+    "1": [
+      "Angela unsuccessfully attacked Bri, her weaker stats proving insufficient to harm Bri's high health.  Bri remained unharmed.",
+      "Bri playfully shot an arrow near Angela, a symbolic attack that caused no real harm; the forest's luck favored Angela in this uneven fight.",
+      "Bri, the mighty archer, chose to observe the Whispering Woods instead of engaging, due to her high health and attack power.  The outcome only involved Bri.",
+      "Angela, aided by the Forest of Fickle Fate, successfully landed a blow on Bri, reducing Bri's health and forcing a reevaluation of Angela's capabilities.",
+      "Bri attempted self-destruction, but the forest intervened, allowing her arrow to only graze her arm.  After this near-death experience, Bri chose to meditate and adjust her strategy."
+    ],
+    "2": [
+      "Angela unsuccessfully attacked Bri, her weaker stats proving insufficient to harm Bri's high health.  Bri remained unharmed.",
+      "Bri playfully shot an arrow near Angela, a symbolic attack that caused no real harm; the forest's luck favored Angela in this uneven fight.",
+      "Bri, the mighty archer, chose to observe the Whispering Woods instead of engaging, due to her high health and attack power.  The outcome only involved Bri.",
+      "Angela, aided by the Forest of Fickle Fate, successfully landed a blow on Bri, reducing Bri's health and forcing a reevaluation of Angela's capabilities.",
+      "Bri attempted self-destruction, but the forest intervened, allowing her arrow to only graze her arm.  After this near-death experience, Bri chose to meditate and adjust her strategy."
+    ]
+  },
+  "playersStats": {
+    "1": [
+      1,
+      "Angela",
+      93,
+      0,
+      "bow",
+      20,
+      50,
+      40,
+      90,
+      80
+    ],
+    "2": [
+      2,
+      "Bri",
+      85,
+      0,
+      "bow, arrows",
+      80,
+      30,
+      40,
+      30,
+      40
+    ]
+  }
+}

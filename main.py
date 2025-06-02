@@ -329,7 +329,7 @@ def main():
                     record_player_action(id, summary)
 
                     currentp_stats = get_player_stats(cur, id)
-                    print("current stats", currentp_stats)
+                    print("\nCurrent stats", currentp_stats)
                     player_equipment = currentp_stats[4]
 
                     # get updated json stats of current player
@@ -346,7 +346,7 @@ def main():
                                           ["gold": 0, "equipment": "old shield", "health": -10], replacing the square brackets with curly braces.
                                          Please don't give any explanation after - just the formatted JSON.""")
                     
-                    print(f"For player {pName}:")
+                    print(f"Stat changes for player {pName}:")
                     print(update_stats)
 
                     # attempt to parse and apply updates
@@ -354,16 +354,14 @@ def main():
                         # Remove triple backticks and markdown syntax if present
                         cleaned_update_stats = re.sub(r"```.*?\n|```", "", update_stats).strip()
                         stat_changes = ast.literal_eval(cleaned_update_stats)
-                        print(stat_changes, "are the stat changes for", pName)
                         for stat, delta in stat_changes.items():
                             if stat == "equipment" and stat_changes["equipment"] != 0:
                                 update_equipment(cur, con, id, stat_changes["equipment"])
                             else:
-                                print("updating", stat, "by", delta)
                                 update_stat(cur, con, id, stat, delta)
                                 cur.execute("SELECT * FROM currentGame WHERE id == ?", (id,))
                                 ifn = cur.fetchone()
-                                print("updated", stat, "By", delta, "for", pName, ifn)
+                                print("updated", stat, "By", delta, "for", pName, ifn, "\n")
                     except Exception as e:
                         print(f"Error updating stats for {pName}: {e}")
 
@@ -374,6 +372,7 @@ def main():
             # decide whether a random encounter will occur for this player
             if random.randint(1, 20) >= 15:
                 # if so, then first generate a random encounter prompt
+                print(f"\n\n{playerName} has run into a random encounter lets see what has happened")
                 print(GenAI(f"""Generate a random dramatic encounter (1 paragraph is sufficient)
                             just like how it works in DnD for {playerName} in a creative matter, following
                             closely to the topic/summary: {storyData['log']}. The player history, if any of {playerName} is: 
@@ -450,7 +449,7 @@ def main():
 
             """ CHECK FOR DEATHS """
             # check if the player dies
-            cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
+            '''cur.execute("SELECT * FROM currentGame WHERE id = ?", (playerID,))
             row = cur.fetchone()
             print("health of", playerName, row[3])
             if row[3] <= 0:
@@ -462,11 +461,21 @@ def main():
 
                 # update - get of all players in this round of game
                 cur.execute(f"SELECT * FROM currentGame")
-                playersInGame = cur.fetchall()
+                playersInGame = cur.fetchall()'''
+            
+
+            cur.execute("SELECT id, name FROM currentGame WHERE health <= 0")
+            dead = cur.fetchall()
+            if dead:
+                print("The following players have died, lets see what happened")
+                for dId, dName in dead:
+                    print(f"{dName} has reached 0 health or below and died, let's see what happened.")
+                    kill_player(dId)
+                    playerNames.remove(dId, dName)
 
         # if there are still more remaining players in the game, make sure to continue
         if playersInGame != []:
-            uInput = input("Type 'end' to save the story and end the game: ")
+            uInput = input("Type 'end' to save the story and end the game otherwise press enter: ")
             if uInput == "end":
                 break
         else:
