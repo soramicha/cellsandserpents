@@ -400,7 +400,7 @@ def main():
                 summary = simplify_outcome(outcome, {playerName})
 
                 # save in player history
-                for id, p in playersInGame:
+                for id, p in playerNames:
                     checkAffectedPlayers = GenAI(f"""check if {outcome} involves {p}. return a single letter T if so, otherwise F""")
                     if checkAffectedPlayers == "T\n":
                         # record the player's summary
